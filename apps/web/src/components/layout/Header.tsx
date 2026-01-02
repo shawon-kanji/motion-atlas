@@ -25,11 +25,11 @@ export function Header({ onMenuClick, title }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-300 bg-gray-100 px-4 lg:px-6">
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
-          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
+          className="rounded-lg p-2 text-gray-600 hover:bg-gray-200 lg:hidden"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -40,13 +40,13 @@ export function Header({ onMenuClick, title }: HeaderProps) {
         {/* Search */}
         <div className="hidden md:block">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600" />
             <input
               type="text"
               placeholder="Search assets..."
-              className="w-64 rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-sm placeholder-gray-400 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="w-64 rounded-lg border border-gray-400 bg-gray-200 py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-600 focus:border-primary-500 focus:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
-            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">
+            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-xs text-gray-700">
               ⌘K
             </kbd>
           </div>
@@ -66,7 +66,7 @@ export function Header({ onMenuClick, title }: HeaderProps) {
         {/* User Menu */}
         <Dropdown
           trigger={
-            <button className="flex items-center gap-2 rounded-lg p-1.5 hover:bg-gray-100">
+            <button className="flex items-center gap-2 rounded-lg p-1.5 hover:bg-gray-200">
               <Avatar name={user?.name || 'User'} src={user?.avatar} size="sm" />
             </button>
           }

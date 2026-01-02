@@ -103,12 +103,12 @@ export default function Home() {
           <Card key={stat.name} padding="md">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">{stat.name}</p>
+                <p className="text-sm font-medium text-gray-700">{stat.name}</p>
                 <p className="mt-1 text-2xl font-semibold text-gray-900">{stat.value}</p>
-                <p className="mt-1 text-sm text-green-600">{stat.change}</p>
+                <p className="mt-1 text-sm text-green-500">{stat.change}</p>
               </div>
-              <div className="rounded-lg bg-primary-50 p-2">
-                <stat.icon className="h-5 w-5 text-primary-600" />
+              <div className="rounded-lg bg-primary-200 p-2">
+                <stat.icon className="h-5 w-5 text-primary-500" />
               </div>
             </div>
           </Card>
@@ -120,7 +120,7 @@ export default function Home() {
         <div className="lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">Recent Assets</h2>
-            <Link to="/assets" className="text-sm font-medium text-primary-600 hover:text-primary-500">
+            <Link to="/assets" className="text-sm font-medium text-primary-500 hover:text-primary-600">
               View all
             </Link>
           </div>
@@ -130,7 +130,7 @@ export default function Home() {
               return (
                 <Card key={asset.id} padding="none" className="overflow-hidden">
                   {/* Thumbnail */}
-                  <div className="relative aspect-video bg-gray-100">
+                  <div className="relative aspect-video bg-gray-300">
                     {asset.thumbnail ? (
                       <img
                         src={asset.thumbnail}
@@ -157,7 +157,7 @@ export default function Home() {
                         <h3 className="truncate text-sm font-medium text-gray-900">
                           {asset.name}
                         </h3>
-                        <p className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+                        <p className="mt-1 flex items-center gap-2 text-xs text-gray-700">
                           <span>{asset.size}</span>
                           <span>•</span>
                           <span className="flex items-center gap-1">
@@ -166,13 +166,13 @@ export default function Home() {
                           </span>
                         </p>
                       </div>
-                      <button className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+                      <button className="rounded-lg p-1 text-gray-600 hover:bg-gray-300 hover:text-gray-800">
                         <MoreHorizontal className="h-4 w-4" />
                       </button>
                     </div>
                     <div className="mt-3 flex items-center gap-2">
                       <Avatar name={asset.owner.name} size="xs" />
-                      <span className="text-xs text-gray-500">{asset.owner.name}</span>
+                      <span className="text-xs text-gray-700">{asset.owner.name}</span>
                     </div>
                   </div>
                 </Card>
@@ -187,7 +187,7 @@ export default function Home() {
             <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
           </div>
           <Card padding="none">
-            <ul className="divide-y divide-gray-100">
+            <ul className="divide-y divide-gray-300">
               {recentActivity.map((activity) => (
                 <li key={activity.id} className="px-4 py-3">
                   <div className="flex items-start gap-3">
@@ -195,19 +195,19 @@ export default function Home() {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-gray-900">
                         <span className="font-medium">{activity.user}</span>{' '}
-                        <span className="text-gray-500">{activity.action}</span>{' '}
+                        <span className="text-gray-700">{activity.action}</span>{' '}
                         <span className="font-medium">{activity.target}</span>
                       </p>
-                      <p className="mt-0.5 text-xs text-gray-500">{activity.time}</p>
+                      <p className="mt-0.5 text-xs text-gray-700">{activity.time}</p>
                     </div>
                   </div>
                 </li>
               ))}
             </ul>
-            <div className="border-t border-gray-100 p-3">
+            <div className="border-t border-gray-300 p-3">
               <Link
                 to="/activity"
-                className="block text-center text-sm font-medium text-primary-600 hover:text-primary-500"
+                className="block text-center text-sm font-medium text-primary-500 hover:text-primary-600"
               >
                 View all activity
               </Link>
@@ -219,31 +219,31 @@ export default function Home() {
             <h3 className="text-sm font-semibold text-gray-900">Storage Usage</h3>
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">34.2 GB of 50 GB used</span>
+                <span className="text-gray-700">34.2 GB of 50 GB used</span>
                 <span className="font-medium text-gray-900">68%</span>
               </div>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-100">
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-400">
                 <div className="h-full w-[68%] rounded-full bg-primary-500" />
               </div>
               <div className="mt-4 space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-blue-500" />
-                    <span className="text-gray-500">Videos</span>
+                    <span className="text-gray-700">Videos</span>
                   </div>
                   <span className="font-medium">24.8 GB</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-green-500" />
-                    <span className="text-gray-500">Images</span>
+                    <span className="text-gray-700">Images</span>
                   </div>
                   <span className="font-medium">6.2 GB</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-purple-500" />
-                    <span className="text-gray-500">Documents</span>
+                    <span className="text-gray-700">Documents</span>
                   </div>
                   <span className="font-medium">3.2 GB</span>
                 </div>

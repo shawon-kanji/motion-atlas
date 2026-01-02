@@ -18,7 +18,7 @@ export function Card({ children, className, padding = 'md', onClick }: CardProps
   return (
     <div
       className={clsx(
-        'bg-white rounded-xl border border-gray-200 shadow-sm',
+        'bg-gray-200 rounded-xl border border-gray-300 shadow-sm',
         paddings[padding],
         className
       )}
@@ -36,7 +36,7 @@ interface CardHeaderProps {
 
 export function CardHeader({ children, className }: CardHeaderProps) {
   return (
-    <div className={clsx('border-b border-gray-200 px-6 py-4', className)}>
+    <div className={clsx('border-b border-gray-300 px-6 py-4', className)}>
       {children}
     </div>
   );

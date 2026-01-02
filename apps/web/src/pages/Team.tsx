@@ -72,19 +72,19 @@ export default function Team() {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-3">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600" />
             <input
               type="text"
               placeholder="Search members..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-400 bg-gray-300 py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-600 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           </div>
           <select
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value)}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            className="rounded-lg border border-gray-400 bg-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
           >
             <option value="all">All Roles</option>
             <option value="Owner">Owners</option>
@@ -100,33 +100,33 @@ export default function Team() {
       {/* Members List */}
       <Card padding="none">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-400">
+            <thead className="bg-gray-300">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
                   Member
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
                   Joined
                 </th>
                 <th className="px-6 py-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-gray-400 bg-gray-200">
               {filteredMembers.map((member) => (
-                <tr key={member.id} className="hover:bg-gray-50">
+                <tr key={member.id} className="hover:bg-gray-300">
                   <td className="whitespace-nowrap px-6 py-4">
                     <div className="flex items-center gap-3">
                       <Avatar name={member.name} size="md" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">{member.name}</p>
-                        <p className="text-sm text-gray-500">{member.email}</p>
+                        <p className="text-sm text-gray-700">{member.email}</p>
                       </div>
                     </div>
                   </td>
@@ -143,7 +143,7 @@ export default function Team() {
                       {member.status}
                     </Badge>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
                     {member.joinedAt || '-'}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right">
@@ -154,7 +154,7 @@ export default function Team() {
                             Resend
                           </Button>
                         )}
-                        <button className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-red-600">
+                        <button className="rounded-lg p-2 text-gray-600 hover:bg-gray-400 hover:text-red-500">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -177,26 +177,26 @@ export default function Team() {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email Addresses</label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">Email Addresses</label>
             <textarea
               rows={3}
               placeholder="Enter email addresses, separated by commas or new lines"
-              className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="block w-full rounded-lg border border-gray-400 bg-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-600 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <select className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+            <label className="block text-sm font-medium text-gray-800 mb-1">Role</label>
+            <select className="block w-full rounded-lg border border-gray-400 bg-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
               <option value="Viewer">Viewer - Can view and comment</option>
               <option value="Editor">Editor - Can upload and edit assets</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Personal Message (optional)</label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">Personal Message (optional)</label>
             <textarea
               rows={2}
               placeholder="Add a personal message to the invitation..."
-              className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="block w-full rounded-lg border border-gray-400 bg-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-600 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           </div>
           <div className="flex justify-end gap-3 pt-4">

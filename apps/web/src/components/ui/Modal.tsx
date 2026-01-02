@@ -55,7 +55,7 @@ export function Modal({
             >
               <Dialog.Panel
                 className={clsx(
-                  'w-full transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all',
+                  'w-full transform overflow-hidden rounded-2xl bg-gray-200 p-6 text-left align-middle shadow-xl transition-all',
                   sizes[size]
                 )}
               >
@@ -70,14 +70,14 @@ export function Modal({
                       </Dialog.Title>
                     )}
                     {description && (
-                      <Dialog.Description className="mt-1 text-sm text-gray-500">
+                      <Dialog.Description className="mt-1 text-sm text-gray-700">
                         {description}
                       </Dialog.Description>
                     )}
                   </div>
                   <button
                     onClick={onClose}
-                    className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
+                    className="rounded-lg p-1 text-gray-600 hover:bg-gray-300 hover:text-gray-800"
                   >
                     <X className="h-5 w-5" />
                   </button>

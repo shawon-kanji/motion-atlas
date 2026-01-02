@@ -42,8 +42,8 @@ export default function Signup() {
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <p className="text-sm text-red-800">{error}</p>
+          <div className="rounded-md bg-red-950 border border-red-800 p-4">
+            <p className="text-sm text-red-400">{error}</p>
           </div>
         )}
 
@@ -96,11 +96,11 @@ export default function Signup() {
           onChange={(e) => setWorkspaceName(e.target.value)}
         />
 
-        <div className="rounded-lg bg-gray-50 p-4">
+        <div className="rounded-lg bg-gray-200 p-4">
           <p className="text-sm font-medium text-gray-900">Free plan includes:</p>
           <ul className="mt-2 space-y-2">
             {features.map((feature) => (
-              <li key={feature} className="flex items-center gap-2 text-sm text-gray-600">
+              <li key={feature} className="flex items-center gap-2 text-sm text-gray-800">
                 <Check className="h-4 w-4 text-green-500" />
                 {feature}
               </li>
@@ -112,20 +112,20 @@ export default function Signup() {
           Create account
         </Button>
 
-        <p className="text-center text-xs text-gray-500">
+        <p className="text-center text-xs text-gray-700">
           By signing up, you agree to our{' '}
-          <Link to="/terms" className="text-primary-600 hover:text-primary-500">
+          <Link to="/terms" className="text-primary-500 hover:text-primary-600">
             Terms of Service
           </Link>{' '}
           and{' '}
-          <Link to="/privacy" className="text-primary-600 hover:text-primary-500">
+          <Link to="/privacy" className="text-primary-500 hover:text-primary-600">
             Privacy Policy
           </Link>
         </p>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-sm text-gray-700">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
+          <Link to="/login" className="font-medium text-primary-500 hover:text-primary-600">
             Sign in
           </Link>
         </p>

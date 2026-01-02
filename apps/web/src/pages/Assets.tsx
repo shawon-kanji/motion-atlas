@@ -250,18 +250,18 @@ export default function Assets() {
         <div className="flex flex-1 items-center gap-3">
           {/* Search */}
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600" />
             <input
               type="text"
               placeholder="Search assets..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-400 bg-gray-300 py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-600 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           </div>
 
           {/* Type Filter */}
-          <div className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white p-1">
+          <div className="flex items-center gap-1 rounded-lg border border-gray-400 bg-gray-300 p-1">
             {(
               ["all", "video", "image", "document", "folder"] as AssetType[]
             ).map((type) => (
@@ -272,7 +272,7 @@ export default function Assets() {
                   "rounded-md px-3 py-1.5 text-xs font-medium transition-colors capitalize",
                   selectedType === type
                     ? "bg-primary-100 text-primary-700"
-                    : "text-gray-600 hover:bg-gray-100",
+                    : "text-gray-800 hover:bg-gray-400",
                 )}
               >
                 {type}
@@ -283,14 +283,14 @@ export default function Assets() {
 
         <div className="flex items-center gap-2">
           {/* View Toggle */}
-          <div className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white p-1">
+          <div className="flex items-center gap-1 rounded-lg border border-gray-400 bg-gray-300 p-1">
             <button
               onClick={() => setViewMode("grid")}
               className={clsx(
                 "rounded-md p-1.5 transition-colors",
                 viewMode === "grid"
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-400 hover:text-gray-600",
+                  ? "bg-gray-400 text-gray-900"
+                  : "text-gray-600 hover:text-gray-800",
               )}
             >
               <Grid3X3 className="h-4 w-4" />
@@ -300,8 +300,8 @@ export default function Assets() {
               className={clsx(
                 "rounded-md p-1.5 transition-colors",
                 viewMode === "list"
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-400 hover:text-gray-600",
+                  ? "bg-gray-400 text-gray-900"
+                  : "text-gray-600 hover:text-gray-800",
               )}
             >
               <List className="h-4 w-4" />
@@ -357,13 +357,13 @@ export default function Assets() {
       {/* Collections Bar */}
       {collections.length > 0 && (
         <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-2">
-          <span className="text-sm font-medium text-gray-500">
+          <span className="text-sm font-medium text-gray-700">
             Collections:
           </span>
           {collections.map((collection) => (
             <button
               key={collection.id}
-              className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-sm hover:bg-gray-50"
+              className="flex items-center gap-2 rounded-full border border-gray-400 bg-gray-300 px-3 py-1 text-sm hover:bg-gray-400"
             >
               <div
                 className="h-2 w-2 rounded-full"
@@ -377,7 +377,7 @@ export default function Assets() {
           ))}
           <button
             onClick={() => setShowNewCollectionModal(true)}
-            className="flex items-center gap-1 rounded-full border border-dashed border-gray-300 px-3 py-1 text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700"
+            className="flex items-center gap-1 rounded-full border border-dashed border-gray-500 px-3 py-1 text-sm text-gray-700 hover:border-gray-600 hover:text-gray-800"
           >
             <Plus className="h-3 w-3" />
             Add
@@ -584,8 +584,8 @@ export default function Assets() {
       ) : (
         /* List View */
         <Card padding="none">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-400">
+            <thead className="bg-gray-300">
               <tr>
                 <th className="w-12 px-4 py-3">
                   <button
@@ -593,8 +593,8 @@ export default function Assets() {
                     className={clsx(
                       "flex h-4 w-4 items-center justify-center rounded border",
                       selectedAssets.size === filteredAssets.length
-                        ? "border-primary-600 bg-primary-600 text-white"
-                        : "border-gray-300 bg-white",
+                        ? "border-primary-500 bg-primary-500 text-gray-50"
+                        : "border-gray-500 bg-gray-300",
                     )}
                   >
                     {selectedAssets.size === filteredAssets.length && (
@@ -602,22 +602,22 @@ export default function Assets() {
                     )}
                   </button>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
                   Name
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
                   Type
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
                   Size
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
                   Modified
                 </th>
                 <th className="w-12 px-4 py-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-gray-400 bg-gray-200">
               {filteredAssets.map((item) => {
                 const Icon = getAssetIcon(item.type);
                 const isSelected = selectedAssets.has(item.id);
@@ -627,8 +627,8 @@ export default function Assets() {
                   <tr
                     key={item.id}
                     className={clsx(
-                      "hover:bg-gray-50 cursor-pointer",
-                      isSelected && "bg-primary-50",
+                      "hover:bg-gray-300 cursor-pointer",
+                      isSelected && "bg-primary-100",
                     )}
                     onClick={() => {
                       if (isFolder) {
@@ -647,8 +647,8 @@ export default function Assets() {
                         className={clsx(
                           "flex h-4 w-4 items-center justify-center rounded border",
                           isSelected
-                            ? "border-primary-600 bg-primary-600 text-white"
-                            : "border-gray-300 bg-white",
+                            ? "border-primary-500 bg-primary-500 text-gray-50"
+                            : "border-gray-500 bg-gray-300",
                         )}
                       >
                         {isSelected && <Check className="h-3 w-3" />}
@@ -659,10 +659,10 @@ export default function Assets() {
                         <Icon
                           className={clsx(
                             "h-5 w-5 shrink-0",
-                            isFolder ? "text-primary-500" : "text-gray-400",
+                            isFolder ? "text-primary-500" : "text-gray-600",
                           )}
                         />
-                        <span className="text-sm font-medium text-gray-900 hover:text-primary-600">
+                        <span className="text-sm font-medium text-gray-900 hover:text-primary-500">
                           {item.name}
                         </span>
                       </div>
@@ -672,12 +672,12 @@ export default function Assets() {
                         {item.type}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500">
+                    <td className="px-4 py-3 text-sm text-gray-700">
                       {"size" in item && item.size
                         ? formatFileSize(item.size)
                         : "-"}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500">
+                    <td className="px-4 py-3 text-sm text-gray-700">
                       {formatTimeAgo(item.updatedAt)}
                     </td>
                     <td className="px-4 py-3">

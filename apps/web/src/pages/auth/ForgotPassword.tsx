@@ -21,15 +21,15 @@ export default function ForgotPassword() {
     return (
       <AuthLayout title="Check your email" subtitle="We've sent you a password reset link">
         <div className="text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
-            <Mail className="h-8 w-8 text-primary-600" />
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-200">
+            <Mail className="h-8 w-8 text-primary-500" />
           </div>
-          <p className="mt-4 text-sm text-gray-600">
+          <p className="mt-4 text-sm text-gray-700">
             If an account exists with that email, you'll receive a password reset link shortly.
           </p>
           <Link
             to="/login"
-            className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-500"
+            className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-primary-600"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to sign in
@@ -59,7 +59,7 @@ export default function ForgotPassword() {
 
         <Link
           to="/login"
-          className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-500"
+          className="flex items-center justify-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-800"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to sign in

@@ -30,13 +30,13 @@ export default function Login() {
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <p className="text-sm text-red-800">{error}</p>
+          <div className="rounded-md bg-red-950 border border-red-800 p-4">
+            <p className="text-sm text-red-400">{error}</p>
           </div>
         )}
 
-        <div className="rounded-md bg-blue-50 p-4">
-          <p className="text-sm text-blue-800">
+        <div className="rounded-md bg-blue-950 border border-blue-800 p-4">
+          <p className="text-sm text-blue-400">
             <strong>Demo credentials:</strong><br />
             Email: demo@example.com<br />
             Password: password123
@@ -55,10 +55,10 @@ export default function Login() {
 
         <div>
           <div className="flex items-center justify-between">
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-800">Password</label>
             <Link
               to="/forgot-password"
-              className="text-sm font-medium text-primary-600 hover:text-primary-500"
+              className="text-sm font-medium text-primary-500 hover:text-primary-600"
             >
               Forgot password?
             </Link>
@@ -81,10 +81,10 @@ export default function Login() {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
+            <div className="w-full border-t border-gray-400" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-2 text-gray-500">Or continue with</span>
+            <span className="bg-gray-50 px-2 text-gray-700">Or continue with</span>
           </div>
         </div>
 
@@ -110,9 +110,9 @@ export default function Login() {
           Continue with Google
         </Button>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-sm text-gray-700">
           Don't have an account?{' '}
-          <Link to="/signup" className="font-medium text-primary-600 hover:text-primary-500">
+          <Link to="/signup" className="font-medium text-primary-500 hover:text-primary-600">
             Sign up for free
           </Link>
         </p>

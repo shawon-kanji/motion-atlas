@@ -107,20 +107,20 @@ export default function Settings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <label className="block text-sm font-medium text-gray-800 mb-1">Description</label>
                     <textarea
                       rows={3}
                       defaultValue="Creative assets for the marketing department"
-                      className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                      className="block w-full rounded-lg border border-gray-400 bg-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-600 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                     />
                   </div>
 
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Default Timezone</label>
+                      <label className="block text-sm font-medium text-gray-800 mb-1">Default Timezone</label>
                       <select
                         defaultValue="America/New_York"
-                        className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        className="block w-full rounded-lg border border-gray-400 bg-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                       >
                         <optgroup label="Americas">
                           <option value="America/New_York">Eastern Time (ET) - New York</option>
@@ -182,13 +182,13 @@ export default function Settings() {
                 </div>
               </Card>
 
-              <Card className="border-red-200 bg-red-50">
-                <h2 className="text-lg font-semibold text-red-900">Danger Zone</h2>
-                <p className="mt-1 text-sm text-red-700">Irreversible and destructive actions</p>
+              <Card className="border-red-800 bg-red-950">
+                <h2 className="text-lg font-semibold text-red-400">Danger Zone</h2>
+                <p className="mt-1 text-sm text-red-500">Irreversible and destructive actions</p>
                 <div className="mt-4 flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-red-900">Delete Workspace</p>
-                    <p className="text-sm text-red-700">Permanently delete this workspace and all its data</p>
+                    <p className="font-medium text-red-400">Delete Workspace</p>
+                    <p className="text-sm text-red-500">Permanently delete this workspace and all its data</p>
                   </div>
                   <Button variant="danger">Delete Workspace</Button>
                 </div>
@@ -211,22 +211,22 @@ export default function Settings() {
                 </div>
 
                 <div className="mt-6">
-                  <table className="min-w-full divide-y divide-gray-200">
+                  <table className="min-w-full divide-y divide-gray-400">
                     <thead>
                       <tr>
-                        <th className="py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                        <th className="py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
                           Member
                         </th>
-                        <th className="py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                        <th className="py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
                           Role
                         </th>
-                        <th className="py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                        <th className="py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
                           Status
                         </th>
                         <th className="py-3"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody className="divide-y divide-gray-400">
                       {members.map((member) => (
                         <tr key={member.id}>
                           <td className="py-4">
@@ -244,7 +244,7 @@ export default function Settings() {
                               <select
                                 defaultValue={member.role}
                                 disabled={member.role === 'Owner'}
-                                className="rounded-md border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500 disabled:bg-gray-50"
+                                className="rounded-md border-gray-400 bg-gray-300 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:bg-gray-400 disabled:text-gray-600"
                               >
                                 <option>Owner</option>
                                 <option>Editor</option>
@@ -544,16 +544,16 @@ export default function Settings() {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email Addresses</label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">Email Addresses</label>
             <textarea
               rows={3}
               placeholder="Enter email addresses, separated by commas"
-              className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="block w-full rounded-lg border border-gray-400 bg-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-600 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <select className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+            <label className="block text-sm font-medium text-gray-800 mb-1">Role</label>
+            <select className="block w-full rounded-lg border border-gray-400 bg-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
               <option>Viewer</option>
               <option>Editor</option>
             </select>

@@ -34,7 +34,7 @@ export function Dropdown({ trigger, items, align = 'right' }: DropdownProps) {
           >
             <Menu.Items
               className={clsx(
-                'absolute z-50 mt-2 w-56 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
+                'absolute z-50 mt-2 w-56 origin-top-right rounded-lg bg-gray-200 shadow-lg ring-1 ring-gray-400 ring-opacity-50 focus:outline-none',
                 align === 'right' ? 'right-0' : 'left-0'
               )}
             >
@@ -53,9 +53,9 @@ export function Dropdown({ trigger, items, align = 'right' }: DropdownProps) {
                         disabled={item.disabled}
                         className={clsx(
                           'flex w-full items-center gap-3 px-4 py-2 text-sm',
-                          active && !item.danger && 'bg-gray-50',
-                          active && item.danger && 'bg-red-50',
-                          item.danger ? 'text-red-600' : 'text-gray-700',
+                          active && !item.danger && 'bg-gray-300',
+                          active && item.danger && 'bg-red-900/30',
+                          item.danger ? 'text-red-400' : 'text-gray-900',
                           item.disabled && 'opacity-50 cursor-not-allowed'
                         )}
                       >
