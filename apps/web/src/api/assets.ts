@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   mockAssets,
   mockFolders,
@@ -11,18 +11,18 @@ import {
   type TeamMember,
   type ActivityItem,
   type DashboardStats,
-} from '../data/mockData';
+} from "../data/mockData";
 import type {
   Asset,
   Folder,
   Collection,
   AssetVersion,
-  Comment
-} from '../stores/assetStore';
-import { useAssetStore } from '../stores/assetStore';
+  Comment,
+} from "../stores/assetStore";
+import { useAssetStore } from "../stores/assetStore";
 
 // Simulate network delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // ============ Assets API ============
 
@@ -30,11 +30,11 @@ export const useAssets = (folderId?: string | null) => {
   const setAssets = useAssetStore((state) => state.setAssets);
 
   return useQuery({
-    queryKey: ['assets', folderId],
+    queryKey: ["assets", folderId],
     queryFn: async () => {
       await delay(300);
       // Filter assets by folderId - null means root level assets
-      const assets = mockAssets.filter(a => a.folderId === folderId);
+      const assets = mockAssets.filter((a) => a.folderId === folderId);
       setAssets(assets);
       return assets;
     },
@@ -43,11 +43,11 @@ export const useAssets = (folderId?: string | null) => {
 
 export const useAsset = (assetId: string) => {
   return useQuery({
-    queryKey: ['asset', assetId],
+    queryKey: ["asset", assetId],
     queryFn: async () => {
       await delay(200);
-      const asset = mockAssets.find(a => a.id === assetId);
-      if (!asset) throw new Error('Asset not found');
+      const asset = mockAssets.find((a) => a.id === assetId);
+      if (!asset) throw new Error("Asset not found");
       return asset;
     },
     enabled: !!assetId,
@@ -59,7 +59,7 @@ export const useCreateAsset = () => {
   const addAsset = useAssetStore((state) => state.addAsset);
 
   return useMutation({
-    mutationFn: async (data: Omit<Asset, 'id' | 'createdAt' | 'updatedAt'>) => {
+    mutationFn: async (data: Omit<Asset, "id" | "createdAt" | "updatedAt">) => {
       await delay(500);
       const newAsset: Asset = {
         ...data,
@@ -72,7 +72,7 @@ export const useCreateAsset = () => {
     },
     onSuccess: (newAsset) => {
       addAsset(newAsset);
-      queryClient.invalidateQueries({ queryKey: ['assets'] });
+      queryClient.invalidateQueries({ queryKey: ["assets"] });
     },
   });
 };
@@ -82,17 +82,27 @@ export const useUpdateAsset = () => {
   const updateAsset = useAssetStore((state) => state.updateAsset);
 
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Asset> }) => {
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<Asset>;
+    }) => {
       await delay(300);
-      const index = mockAssets.findIndex(a => a.id === id);
-      if (index === -1) throw new Error('Asset not found');
-      mockAssets[index] = { ...mockAssets[index], ...updates, updatedAt: new Date().toISOString() };
+      const index = mockAssets.findIndex((a) => a.id === id);
+      if (index === -1) throw new Error("Asset not found");
+      mockAssets[index] = {
+        ...mockAssets[index],
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
       return mockAssets[index];
     },
     onSuccess: (asset) => {
       updateAsset(asset.id, asset);
-      queryClient.invalidateQueries({ queryKey: ['assets'] });
-      queryClient.invalidateQueries({ queryKey: ['asset', asset.id] });
+      queryClient.invalidateQueries({ queryKey: ["assets"] });
+      queryClient.invalidateQueries({ queryKey: ["asset", asset.id] });
     },
   });
 };
@@ -104,13 +114,13 @@ export const useDeleteAsset = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       await delay(300);
-      const index = mockAssets.findIndex(a => a.id === id);
+      const index = mockAssets.findIndex((a) => a.id === id);
       if (index !== -1) mockAssets.splice(index, 1);
       return id;
     },
     onSuccess: (id) => {
       deleteAsset(id);
-      queryClient.invalidateQueries({ queryKey: ['assets'] });
+      queryClient.invalidateQueries({ queryKey: ["assets"] });
     },
   });
 };
@@ -122,15 +132,15 @@ export const useDeleteAssets = () => {
   return useMutation({
     mutationFn: async (ids: string[]) => {
       await delay(300);
-      ids.forEach(id => {
-        const index = mockAssets.findIndex(a => a.id === id);
+      ids.forEach((id) => {
+        const index = mockAssets.findIndex((a) => a.id === id);
         if (index !== -1) mockAssets.splice(index, 1);
       });
       return ids;
     },
     onSuccess: (ids) => {
       deleteAssets(ids);
-      queryClient.invalidateQueries({ queryKey: ['assets'] });
+      queryClient.invalidateQueries({ queryKey: ["assets"] });
     },
   });
 };
@@ -141,11 +151,13 @@ export const useFolders = (parentId?: string | null) => {
   const setFolders = useAssetStore((state) => state.setFolders);
 
   return useQuery({
-    queryKey: ['folders', parentId],
+    queryKey: ["folders", parentId],
     queryFn: async () => {
       await delay(200);
+      console.log("getting folders:::", mockFolders);
       // Filter folders by parentId - null means root level folders
-      const folders = mockFolders.filter(f => f.parentId === parentId);
+      const folders = mockFolders.filter((f) => f.parentId === parentId);
+      console.log("filtered::", folders, parentId);
       setFolders(folders);
       return folders;
     },
@@ -154,11 +166,11 @@ export const useFolders = (parentId?: string | null) => {
 
 export const useFolder = (folderId: string) => {
   return useQuery({
-    queryKey: ['folder', folderId],
+    queryKey: ["folder", folderId],
     queryFn: async () => {
       await delay(200);
-      const folder = mockFolders.find(f => f.id === folderId);
-      if (!folder) throw new Error('Folder not found');
+      const folder = mockFolders.find((f) => f.id === folderId);
+      if (!folder) throw new Error("Folder not found");
       return folder;
     },
     enabled: !!folderId,
@@ -167,22 +179,22 @@ export const useFolder = (folderId: string) => {
 
 export const useFolderPath = (folderId: string | undefined) => {
   return useQuery({
-    queryKey: ['folderPath', folderId],
+    queryKey: ["folderPath", folderId],
     queryFn: async () => {
       await delay(100);
       if (!folderId) return [];
-      
+
       // Build path from current folder to root
       const path: Folder[] = [];
       let currentId: string | null = folderId;
-      
+
       while (currentId) {
-        const folder = mockFolders.find(f => f.id === currentId);
+        const folder = mockFolders.find((f) => f.id === currentId);
         if (!folder) break;
         path.unshift(folder); // Add to beginning to build path from root to current
         currentId = folder.parentId;
       }
-      
+
       return path;
     },
     enabled: !!folderId,
@@ -209,7 +221,7 @@ export const useCreateFolder = () => {
     },
     onSuccess: (newFolder) => {
       addFolder(newFolder);
-      queryClient.invalidateQueries({ queryKey: ['folders'] });
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
     },
   });
 };
@@ -219,16 +231,26 @@ export const useUpdateFolder = () => {
   const updateFolder = useAssetStore((state) => state.updateFolder);
 
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Folder> }) => {
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<Folder>;
+    }) => {
       await delay(300);
-      const index = mockFolders.findIndex(f => f.id === id);
-      if (index === -1) throw new Error('Folder not found');
-      mockFolders[index] = { ...mockFolders[index], ...updates, updatedAt: new Date().toISOString() };
+      const index = mockFolders.findIndex((f) => f.id === id);
+      if (index === -1) throw new Error("Folder not found");
+      mockFolders[index] = {
+        ...mockFolders[index],
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
       return mockFolders[index];
     },
     onSuccess: (folder) => {
       updateFolder(folder.id, folder);
-      queryClient.invalidateQueries({ queryKey: ['folders'] });
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
     },
   });
 };
@@ -240,13 +262,13 @@ export const useDeleteFolder = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       await delay(300);
-      const index = mockFolders.findIndex(f => f.id === id);
+      const index = mockFolders.findIndex((f) => f.id === id);
       if (index !== -1) mockFolders.splice(index, 1);
       return id;
     },
     onSuccess: (id) => {
       deleteFolder(id);
-      queryClient.invalidateQueries({ queryKey: ['folders'] });
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
     },
   });
 };
@@ -257,7 +279,7 @@ export const useCollections = () => {
   const setCollections = useAssetStore((state) => state.setCollections);
 
   return useQuery({
-    queryKey: ['collections'],
+    queryKey: ["collections"],
     queryFn: async () => {
       await delay(200);
       setCollections(mockCollections);
@@ -268,11 +290,11 @@ export const useCollections = () => {
 
 export const useCollection = (collectionId: string) => {
   return useQuery({
-    queryKey: ['collection', collectionId],
+    queryKey: ["collection", collectionId],
     queryFn: async () => {
       await delay(200);
-      const collection = mockCollections.find(c => c.id === collectionId);
-      if (!collection) throw new Error('Collection not found');
+      const collection = mockCollections.find((c) => c.id === collectionId);
+      if (!collection) throw new Error("Collection not found");
       return collection;
     },
     enabled: !!collectionId,
@@ -284,7 +306,11 @@ export const useCreateCollection = () => {
   const addCollection = useAssetStore((state) => state.addCollection);
 
   return useMutation({
-    mutationFn: async (data: { name: string; description?: string; color: string }) => {
+    mutationFn: async (data: {
+      name: string;
+      description?: string;
+      color: string;
+    }) => {
       await delay(300);
       const newCollection: Collection = {
         id: `collection-${Date.now()}`,
@@ -301,7 +327,7 @@ export const useCreateCollection = () => {
     },
     onSuccess: (newCollection) => {
       addCollection(newCollection);
-      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ["collections"] });
     },
   });
 };
@@ -311,16 +337,26 @@ export const useUpdateCollection = () => {
   const updateCollection = useAssetStore((state) => state.updateCollection);
 
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Collection> }) => {
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<Collection>;
+    }) => {
       await delay(300);
-      const index = mockCollections.findIndex(c => c.id === id);
-      if (index === -1) throw new Error('Collection not found');
-      mockCollections[index] = { ...mockCollections[index], ...updates, updatedAt: new Date().toISOString() };
+      const index = mockCollections.findIndex((c) => c.id === id);
+      if (index === -1) throw new Error("Collection not found");
+      mockCollections[index] = {
+        ...mockCollections[index],
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
       return mockCollections[index];
     },
     onSuccess: (collection) => {
       updateCollection(collection.id, collection);
-      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ["collections"] });
     },
   });
 };
@@ -332,13 +368,13 @@ export const useDeleteCollection = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       await delay(300);
-      const index = mockCollections.findIndex(c => c.id === id);
+      const index = mockCollections.findIndex((c) => c.id === id);
       if (index !== -1) mockCollections.splice(index, 1);
       return id;
     },
     onSuccess: (id) => {
       deleteCollection(id);
-      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ["collections"] });
     },
   });
 };
@@ -347,7 +383,7 @@ export const useDeleteCollection = () => {
 
 export const useAssetVersions = (assetId: string) => {
   return useQuery({
-    queryKey: ['assetVersions', assetId],
+    queryKey: ["assetVersions", assetId],
     queryFn: async (): Promise<AssetVersion[]> => {
       await delay(200);
       return mockVersions[assetId] || [];
@@ -360,7 +396,7 @@ export const useAssetVersions = (assetId: string) => {
 
 export const useAssetComments = (assetId: string) => {
   return useQuery({
-    queryKey: ['assetComments', assetId],
+    queryKey: ["assetComments", assetId],
     queryFn: async (): Promise<Comment[]> => {
       await delay(200);
       return mockComments[assetId] || [];
@@ -401,7 +437,9 @@ export const useAddComment = () => {
       return newComment;
     },
     onSuccess: (comment) => {
-      queryClient.invalidateQueries({ queryKey: ['assetComments', comment.assetId] });
+      queryClient.invalidateQueries({
+        queryKey: ["assetComments", comment.assetId],
+      });
     },
   });
 };
@@ -410,7 +448,7 @@ export const useAddComment = () => {
 
 export const useTeamMembers = () => {
   return useQuery({
-    queryKey: ['teamMembers'],
+    queryKey: ["teamMembers"],
     queryFn: async (): Promise<TeamMember[]> => {
       await delay(300);
       return mockTeamMembers;
@@ -422,21 +460,21 @@ export const useInviteTeamMember = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { email: string; role: TeamMember['role'] }) => {
+    mutationFn: async (data: { email: string; role: TeamMember["role"] }) => {
       await delay(500);
       const newMember: TeamMember = {
         id: `user-${Date.now()}`,
-        name: data.email.split('@')[0],
+        name: data.email.split("@")[0],
         email: data.email,
         role: data.role,
-        status: 'pending',
+        status: "pending",
         joinedAt: new Date().toISOString(),
       };
       mockTeamMembers.push(newMember);
       return newMember;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
+      queryClient.invalidateQueries({ queryKey: ["teamMembers"] });
     },
   });
 };
@@ -445,15 +483,21 @@ export const useUpdateTeamMember = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<TeamMember> }) => {
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<TeamMember>;
+    }) => {
       await delay(300);
-      const index = mockTeamMembers.findIndex(m => m.id === id);
-      if (index === -1) throw new Error('Member not found');
+      const index = mockTeamMembers.findIndex((m) => m.id === id);
+      if (index === -1) throw new Error("Member not found");
       mockTeamMembers[index] = { ...mockTeamMembers[index], ...updates };
       return mockTeamMembers[index];
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
+      queryClient.invalidateQueries({ queryKey: ["teamMembers"] });
     },
   });
 };
@@ -464,12 +508,12 @@ export const useRemoveTeamMember = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       await delay(300);
-      const index = mockTeamMembers.findIndex(m => m.id === id);
+      const index = mockTeamMembers.findIndex((m) => m.id === id);
       if (index !== -1) mockTeamMembers.splice(index, 1);
       return id;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
+      queryClient.invalidateQueries({ queryKey: ["teamMembers"] });
     },
   });
 };
@@ -478,7 +522,7 @@ export const useRemoveTeamMember = () => {
 
 export const useActivity = () => {
   return useQuery({
-    queryKey: ['activity'],
+    queryKey: ["activity"],
     queryFn: async (): Promise<ActivityItem[]> => {
       await delay(200);
       return mockActivity;
@@ -488,7 +532,7 @@ export const useActivity = () => {
 
 export const useDashboardStats = () => {
   return useQuery({
-    queryKey: ['dashboardStats'],
+    queryKey: ["dashboardStats"],
     queryFn: async (): Promise<DashboardStats> => {
       await delay(200);
       return mockStats;
@@ -501,7 +545,7 @@ export const useDashboardStats = () => {
 export interface UploadProgress {
   file: File;
   progress: number;
-  status: 'pending' | 'uploading' | 'processing' | 'complete' | 'error';
+  status: "pending" | "uploading" | "processing" | "complete" | "error";
   error?: string;
   assetId?: string;
 }
@@ -528,40 +572,40 @@ export const useUploadAsset = () => {
       // Simulate processing
       await delay(500);
 
-      const isVideo = file.type.startsWith('video/');
-      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith("video/");
+      const isImage = file.type.startsWith("image/");
 
       const newAsset: Asset = {
         id: `asset-${Date.now()}`,
-        name: file.name.replace(/\.[^/.]+$/, ''),
-        type: isVideo ? 'video' : isImage ? 'image' : 'document',
+        name: file.name.replace(/\.[^/.]+$/, ""),
+        type: isVideo ? "video" : isImage ? "image" : "document",
         thumbnail: isVideo
-          ? 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg'
-          : 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800',
+          ? "https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg"
+          : "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800",
         url: isVideo
-          ? 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-          : 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800',
+          ? "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          : "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800",
         size: file.size,
         duration: isVideo ? 120 : undefined,
         width: 1920,
         height: 1080,
-        format: file.name.split('.').pop() || 'unknown',
-        status: 'ready',
+        format: file.name.split(".").pop() || "unknown",
+        status: "ready",
         folderId,
         collectionIds: [],
         tags: [],
         metadata: {},
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        createdBy: 'user-1',
+        createdBy: "user-1",
       };
 
       mockAssets.unshift(newAsset);
       return newAsset;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assets'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      queryClient.invalidateQueries({ queryKey: ["assets"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
     },
   });
 };

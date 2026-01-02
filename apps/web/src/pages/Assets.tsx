@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AppLayout } from '@/components/layout';
-import { Button, Card, Badge, Dropdown, Modal, Input } from '@/components/ui';
-import { clsx } from 'clsx';
+import { useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { AppLayout } from "@/components/layout";
+import { Button, Card, Badge, Dropdown, Modal, Input } from "@/components/ui";
+import { clsx } from "clsx";
 import {
   Upload,
   FolderPlus,
@@ -26,7 +26,7 @@ import {
   Check,
   Plus,
   Layers,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   useAssets,
   useFolders,
@@ -35,29 +35,29 @@ import {
   useCreateFolder,
   useCreateCollection,
   useDeleteAssets,
-} from '@/api/assets';
+} from "@/api/assets";
 // Asset store available for future use when adding local state management
 
-type ViewMode = 'grid' | 'list';
-type AssetType = 'all' | 'video' | 'image' | 'document' | 'folder';
+type ViewMode = "grid" | "list";
+type AssetType = "all" | "video" | "image" | "document" | "folder";
 
 // Color options for collections
 const COLLECTION_COLORS = [
-  { name: 'Blue', value: '#3B82F6' },
-  { name: 'Green', value: '#10B981' },
-  { name: 'Yellow', value: '#F59E0B' },
-  { name: 'Red', value: '#EF4444' },
-  { name: 'Purple', value: '#8B5CF6' },
-  { name: 'Pink', value: '#EC4899' },
-  { name: 'Indigo', value: '#6366F1' },
-  { name: 'Teal', value: '#14B8A6' },
+  { name: "Blue", value: "#3B82F6" },
+  { name: "Green", value: "#10B981" },
+  { name: "Yellow", value: "#F59E0B" },
+  { name: "Red", value: "#EF4444" },
+  { name: "Purple", value: "#8B5CF6" },
+  { name: "Pink", value: "#EC4899" },
+  { name: "Indigo", value: "#6366F1" },
+  { name: "Teal", value: "#14B8A6" },
 ];
 
 function formatFileSize(bytes: number): string {
-  if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(1) + ' GB';
-  if (bytes >= 1048576) return (bytes / 1048576).toFixed(0) + ' MB';
-  if (bytes >= 1024) return (bytes / 1024).toFixed(0) + ' KB';
-  return bytes + ' bytes';
+  if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(1) + " GB";
+  if (bytes >= 1048576) return (bytes / 1048576).toFixed(0) + " MB";
+  if (bytes >= 1024) return (bytes / 1024).toFixed(0) + " KB";
+  return bytes + " bytes";
 }
 
 function formatTimeAgo(dateString: string): string {
@@ -67,7 +67,7 @@ function formatTimeAgo(dateString: string): string {
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffHours < 1) return 'Just now';
+  if (diffHours < 1) return "Just now";
   if (diffHours < 24) return `${diffHours} hours ago`;
   if (diffDays < 7) return `${diffDays} days ago`;
   return date.toLocaleDateString();
@@ -76,16 +76,16 @@ function formatTimeAgo(dateString: string): string {
 function formatDuration(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
 function getAssetIcon(type: string) {
   switch (type) {
-    case 'video':
+    case "video":
       return Video;
-    case 'image':
+    case "image":
       return Image;
-    case 'folder':
+    case "folder":
       return Folder;
     default:
       return FileText;
@@ -97,21 +97,25 @@ export default function Assets() {
   const { folderId } = useParams<{ folderId?: string }>();
 
   // View state
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [selectedType, setSelectedType] = useState<AssetType>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [selectedType, setSelectedType] = useState<AssetType>("all");
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Modal state
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [showNewCollectionModal, setShowNewCollectionModal] = useState(false);
-  const [newFolderName, setNewFolderName] = useState('');
-  const [newCollectionName, setNewCollectionName] = useState('');
-  const [newCollectionDescription, setNewCollectionDescription] = useState('');
-  const [newCollectionColor, setNewCollectionColor] = useState(COLLECTION_COLORS[0].value);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [newCollectionName, setNewCollectionName] = useState("");
+  const [newCollectionDescription, setNewCollectionDescription] = useState("");
+  const [newCollectionColor, setNewCollectionColor] = useState(
+    COLLECTION_COLORS[0].value,
+  );
 
   // API hooks - pass folderId to filter by current folder
-  const { data: assets = [], isLoading: assetsLoading } = useAssets(folderId || null);
+  const { data: assets = [], isLoading: assetsLoading } = useAssets(
+    folderId || null,
+  );
   const { data: folders = [] } = useFolders(folderId || null);
   const { data: folderPath = [] } = useFolderPath(folderId);
   const { data: collections = [] } = useCollections();
@@ -121,9 +125,9 @@ export default function Assets() {
 
   // Combine folders and assets for display
   const allItems = [
-    ...folders.map(f => ({
+    ...folders.map((f) => ({
       ...f,
-      type: 'folder' as const,
+      type: "folder" as const,
       thumbnail: undefined,
       duration: undefined,
       tags: [],
@@ -132,8 +136,12 @@ export default function Assets() {
   ];
 
   const filteredAssets = allItems.filter((item) => {
-    if (selectedType !== 'all' && item.type !== selectedType) return false;
-    if (searchQuery && !item.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (selectedType !== "all" && item.type !== selectedType) return false;
+    if (
+      searchQuery &&
+      !item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+      return false;
     return true;
   });
 
@@ -161,12 +169,12 @@ export default function Assets() {
     try {
       await createFolder.mutateAsync({
         name: newFolderName,
-        parentId: folderId || null
+        parentId: folderId || null,
       });
       setShowNewFolderModal(false);
-      setNewFolderName('');
+      setNewFolderName("");
     } catch (error) {
-      console.error('Failed to create folder:', error);
+      console.error("Failed to create folder:", error);
     }
   };
 
@@ -180,11 +188,11 @@ export default function Assets() {
         color: newCollectionColor,
       });
       setShowNewCollectionModal(false);
-      setNewCollectionName('');
-      setNewCollectionDescription('');
+      setNewCollectionName("");
+      setNewCollectionDescription("");
       setNewCollectionColor(COLLECTION_COLORS[0].value);
     } catch (error) {
-      console.error('Failed to create collection:', error);
+      console.error("Failed to create collection:", error);
     }
   };
 
@@ -196,24 +204,25 @@ export default function Assets() {
         await deleteAssets.mutateAsync(Array.from(selectedAssets));
         setSelectedAssets(new Set());
       } catch (error) {
-        console.error('Failed to delete assets:', error);
+        console.error("Failed to delete assets:", error);
       }
     }
   };
 
   const breadcrumbs = [
-    { name: 'All Assets', href: '/assets' },
-    ...folderPath.map(folder => ({
+    { name: "All Assets", href: "/assets" },
+    ...folderPath.map((folder) => ({
       name: folder.name,
-      href: `/assets/${folder.id}`
+      href: `/assets/${folder.id}`,
     })),
   ];
 
   // Current folder is the last item in the path
-  const currentFolder = folderPath.length > 0 ? folderPath[folderPath.length - 1] : null;
+  const currentFolder =
+    folderPath.length > 0 ? folderPath[folderPath.length - 1] : null;
 
   // Page title based on current folder
-  const pageTitle = currentFolder ? currentFolder.name : 'Assets';
+  const pageTitle = currentFolder ? currentFolder.name : "Assets";
 
   return (
     <AppLayout title={pageTitle}>
@@ -226,8 +235,8 @@ export default function Assets() {
               to={crumb.href}
               className={clsx(
                 index === breadcrumbs.length - 1
-                  ? 'font-medium text-gray-900'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? "font-medium text-gray-900"
+                  : "text-gray-500 hover:text-gray-700",
               )}
             >
               {crumb.name}
@@ -253,15 +262,17 @@ export default function Assets() {
 
           {/* Type Filter */}
           <div className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white p-1">
-            {(['all', 'video', 'image', 'document', 'folder'] as AssetType[]).map((type) => (
+            {(
+              ["all", "video", "image", "document", "folder"] as AssetType[]
+            ).map((type) => (
               <button
                 key={type}
                 onClick={() => setSelectedType(type)}
                 className={clsx(
-                  'rounded-md px-3 py-1.5 text-xs font-medium transition-colors capitalize',
+                  "rounded-md px-3 py-1.5 text-xs font-medium transition-colors capitalize",
                   selectedType === type
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? "bg-primary-100 text-primary-700"
+                    : "text-gray-600 hover:bg-gray-100",
                 )}
               >
                 {type}
@@ -274,37 +285,51 @@ export default function Assets() {
           {/* View Toggle */}
           <div className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white p-1">
             <button
-              onClick={() => setViewMode('grid')}
+              onClick={() => setViewMode("grid")}
               className={clsx(
-                'rounded-md p-1.5 transition-colors',
-                viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'
+                "rounded-md p-1.5 transition-colors",
+                viewMode === "grid"
+                  ? "bg-gray-100 text-gray-900"
+                  : "text-gray-400 hover:text-gray-600",
               )}
             >
               <Grid3X3 className="h-4 w-4" />
             </button>
             <button
-              onClick={() => setViewMode('list')}
+              onClick={() => setViewMode("list")}
               className={clsx(
-                'rounded-md p-1.5 transition-colors',
-                viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'
+                "rounded-md p-1.5 transition-colors",
+                viewMode === "list"
+                  ? "bg-gray-100 text-gray-900"
+                  : "text-gray-400 hover:text-gray-600",
               )}
             >
               <List className="h-4 w-4" />
             </button>
           </div>
 
-          <Button variant="secondary" size="sm" leftIcon={<Filter className="h-4 w-4" />}>
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<Filter className="h-4 w-4" />}
+          >
             Filter
           </Button>
 
-          <Button variant="secondary" size="sm" leftIcon={<SortAsc className="h-4 w-4" />}>
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<SortAsc className="h-4 w-4" />}
+          >
             Sort
           </Button>
 
           <Button
             size="sm"
             leftIcon={<Upload className="h-4 w-4" />}
-            onClick={() => navigate('/upload')}
+            onClick={() =>
+              navigate(folderId ? `/upload?folderId=${folderId}` : "/upload")
+            }
           >
             Upload
           </Button>
@@ -332,7 +357,9 @@ export default function Assets() {
       {/* Collections Bar */}
       {collections.length > 0 && (
         <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-2">
-          <span className="text-sm font-medium text-gray-500">Collections:</span>
+          <span className="text-sm font-medium text-gray-500">
+            Collections:
+          </span>
           {collections.map((collection) => (
             <button
               key={collection.id}
@@ -343,7 +370,9 @@ export default function Assets() {
                 style={{ backgroundColor: collection.color }}
               />
               <span>{collection.name}</span>
-              <Badge variant="default" className="text-xs">{collection.assetCount}</Badge>
+              <Badge variant="default" className="text-xs">
+                {collection.assetCount}
+              </Badge>
             </button>
           ))}
           <button
@@ -375,10 +404,18 @@ export default function Assets() {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" leftIcon={<Download className="h-4 w-4" />}>
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<Download className="h-4 w-4" />}
+            >
               Download
             </Button>
-            <Button variant="ghost" size="sm" leftIcon={<Share2 className="h-4 w-4" />}>
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<Share2 className="h-4 w-4" />}
+            >
               Share
             </Button>
             <Button
@@ -403,20 +440,20 @@ export default function Assets() {
       )}
 
       {/* Assets Grid/List */}
-      {!assetsLoading && viewMode === 'grid' ? (
+      {!assetsLoading && viewMode === "grid" ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredAssets.map((item) => {
             const Icon = getAssetIcon(item.type);
             const isSelected = selectedAssets.has(item.id);
-            const isFolder = item.type === 'folder';
+            const isFolder = item.type === "folder";
 
             return (
               <Card
                 key={item.id}
                 padding="none"
                 className={clsx(
-                  'group overflow-hidden transition-shadow hover:shadow-md cursor-pointer',
-                  isSelected && 'ring-2 ring-primary-500'
+                  "group overflow-hidden transition-shadow hover:shadow-md cursor-pointer",
+                  isSelected && "ring-2 ring-primary-500",
                 )}
                 onClick={() => {
                   if (isFolder) {
@@ -428,7 +465,7 @@ export default function Assets() {
               >
                 {/* Thumbnail */}
                 <div className="relative aspect-video bg-gray-100">
-                  {'thumbnail' in item && item.thumbnail ? (
+                  {"thumbnail" in item && item.thumbnail ? (
                     <img
                       src={item.thumbnail}
                       alt={item.name}
@@ -436,10 +473,15 @@ export default function Assets() {
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center">
-                      <Icon className={clsx('h-12 w-12', isFolder ? 'text-primary-500' : 'text-gray-400')} />
+                      <Icon
+                        className={clsx(
+                          "h-12 w-12",
+                          isFolder ? "text-primary-500" : "text-gray-400",
+                        )}
+                      />
                     </div>
                   )}
-                  {'duration' in item && item.duration && (
+                  {"duration" in item && item.duration && (
                     <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">
                       <Play className="h-3 w-3" />
                       {formatDuration(item.duration)}
@@ -452,16 +494,16 @@ export default function Assets() {
                       toggleAssetSelection(item.id);
                     }}
                     className={clsx(
-                      'absolute left-2 top-2 flex h-5 w-5 items-center justify-center rounded border-2 transition-opacity',
+                      "absolute left-2 top-2 flex h-5 w-5 items-center justify-center rounded border-2 transition-opacity",
                       isSelected
-                        ? 'border-primary-600 bg-primary-600 text-white opacity-100'
-                        : 'border-white bg-white/80 text-transparent opacity-0 group-hover:opacity-100'
+                        ? "border-primary-600 bg-primary-600 text-white opacity-100"
+                        : "border-white bg-white/80 text-transparent opacity-0 group-hover:opacity-100",
                     )}
                   >
                     <Check className="h-3 w-3" />
                   </button>
                   {/* Folder asset count */}
-                  {isFolder && 'assetCount' in item && (
+                  {isFolder && "assetCount" in item && (
                     <div className="absolute right-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">
                       {(item as { assetCount: number }).assetCount} items
                     </div>
@@ -472,14 +514,14 @@ export default function Assets() {
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <span
-                        className="block truncate text-sm font-medium text-gray-900 hover:text-primary-600"
-                      >
+                      <span className="block truncate text-sm font-medium text-gray-900 hover:text-primary-600">
                         {item.name}
                       </span>
                       <p className="mt-1 flex items-center gap-2 text-xs text-gray-500">
-                        {'size' in item && item.size && <span>{formatFileSize(item.size)}</span>}
-                        {'size' in item && item.size && <span>•</span>}
+                        {"size" in item && item.size && (
+                          <span>{formatFileSize(item.size)}</span>
+                        )}
+                        {"size" in item && item.size && <span>•</span>}
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {formatTimeAgo(item.updatedAt)}
@@ -496,18 +538,41 @@ export default function Assets() {
                         </button>
                       }
                       items={[
-                        { label: 'Preview', icon: <Play className="h-4 w-4" />, onClick: () => navigate(`/assets/view/${item.id}`) },
-                        { label: 'Download', icon: <Download className="h-4 w-4" />, onClick: () => {} },
-                        { label: 'Share', icon: <Share2 className="h-4 w-4" />, onClick: () => {} },
-                        { label: 'Rename', icon: <Edit className="h-4 w-4" />, onClick: () => {} },
-                        { label: 'Delete', icon: <Trash2 className="h-4 w-4" />, onClick: () => deleteAssets.mutate([item.id]), danger: true },
+                        {
+                          label: "Preview",
+                          icon: <Play className="h-4 w-4" />,
+                          onClick: () => navigate(`/assets/view/${item.id}`),
+                        },
+                        {
+                          label: "Download",
+                          icon: <Download className="h-4 w-4" />,
+                          onClick: () => {},
+                        },
+                        {
+                          label: "Share",
+                          icon: <Share2 className="h-4 w-4" />,
+                          onClick: () => {},
+                        },
+                        {
+                          label: "Rename",
+                          icon: <Edit className="h-4 w-4" />,
+                          onClick: () => {},
+                        },
+                        {
+                          label: "Delete",
+                          icon: <Trash2 className="h-4 w-4" />,
+                          onClick: () => deleteAssets.mutate([item.id]),
+                          danger: true,
+                        },
                       ]}
                     />
                   </div>
-                  {'tags' in item && item.tags && item.tags.length > 0 && (
+                  {"tags" in item && item.tags && item.tags.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1">
                       {item.tags.map((tag) => (
-                        <Badge key={tag} size="sm">{tag}</Badge>
+                        <Badge key={tag} size="sm">
+                          {tag}
+                        </Badge>
                       ))}
                     </div>
                   )}
@@ -526,13 +591,15 @@ export default function Assets() {
                   <button
                     onClick={selectAll}
                     className={clsx(
-                      'flex h-4 w-4 items-center justify-center rounded border',
+                      "flex h-4 w-4 items-center justify-center rounded border",
                       selectedAssets.size === filteredAssets.length
-                        ? 'border-primary-600 bg-primary-600 text-white'
-                        : 'border-gray-300 bg-white'
+                        ? "border-primary-600 bg-primary-600 text-white"
+                        : "border-gray-300 bg-white",
                     )}
                   >
-                    {selectedAssets.size === filteredAssets.length && <Check className="h-3 w-3" />}
+                    {selectedAssets.size === filteredAssets.length && (
+                      <Check className="h-3 w-3" />
+                    )}
                   </button>
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -554,12 +621,15 @@ export default function Assets() {
               {filteredAssets.map((item) => {
                 const Icon = getAssetIcon(item.type);
                 const isSelected = selectedAssets.has(item.id);
-                const isFolder = item.type === 'folder';
+                const isFolder = item.type === "folder";
 
                 return (
                   <tr
                     key={item.id}
-                    className={clsx('hover:bg-gray-50 cursor-pointer', isSelected && 'bg-primary-50')}
+                    className={clsx(
+                      "hover:bg-gray-50 cursor-pointer",
+                      isSelected && "bg-primary-50",
+                    )}
                     onClick={() => {
                       if (isFolder) {
                         navigate(`/assets/${item.id}`);
@@ -575,10 +645,10 @@ export default function Assets() {
                           toggleAssetSelection(item.id);
                         }}
                         className={clsx(
-                          'flex h-4 w-4 items-center justify-center rounded border',
+                          "flex h-4 w-4 items-center justify-center rounded border",
                           isSelected
-                            ? 'border-primary-600 bg-primary-600 text-white'
-                            : 'border-gray-300 bg-white'
+                            ? "border-primary-600 bg-primary-600 text-white"
+                            : "border-gray-300 bg-white",
                         )}
                       >
                         {isSelected && <Check className="h-3 w-3" />}
@@ -586,19 +656,30 @@ export default function Assets() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <Icon className={clsx('h-5 w-5 shrink-0', isFolder ? 'text-primary-500' : 'text-gray-400')} />
+                        <Icon
+                          className={clsx(
+                            "h-5 w-5 shrink-0",
+                            isFolder ? "text-primary-500" : "text-gray-400",
+                          )}
+                        />
                         <span className="text-sm font-medium text-gray-900 hover:text-primary-600">
                           {item.name}
                         </span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <Badge size="sm" className="capitalize">{item.type}</Badge>
+                      <Badge size="sm" className="capitalize">
+                        {item.type}
+                      </Badge>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-500">
-                      {'size' in item && item.size ? formatFileSize(item.size) : '-'}
+                      {"size" in item && item.size
+                        ? formatFileSize(item.size)
+                        : "-"}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500">{formatTimeAgo(item.updatedAt)}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">
+                      {formatTimeAgo(item.updatedAt)}
+                    </td>
                     <td className="px-4 py-3">
                       <Dropdown
                         trigger={
@@ -610,11 +691,32 @@ export default function Assets() {
                           </button>
                         }
                         items={[
-                          { label: 'Preview', icon: <Play className="h-4 w-4" />, onClick: () => navigate(`/assets/view/${item.id}`) },
-                          { label: 'Download', icon: <Download className="h-4 w-4" />, onClick: () => {} },
-                          { label: 'Share', icon: <Share2 className="h-4 w-4" />, onClick: () => {} },
-                          { label: 'Rename', icon: <Edit className="h-4 w-4" />, onClick: () => {} },
-                          { label: 'Delete', icon: <Trash2 className="h-4 w-4" />, onClick: () => deleteAssets.mutate([item.id]), danger: true },
+                          {
+                            label: "Preview",
+                            icon: <Play className="h-4 w-4" />,
+                            onClick: () => navigate(`/assets/view/${item.id}`),
+                          },
+                          {
+                            label: "Download",
+                            icon: <Download className="h-4 w-4" />,
+                            onClick: () => {},
+                          },
+                          {
+                            label: "Share",
+                            icon: <Share2 className="h-4 w-4" />,
+                            onClick: () => {},
+                          },
+                          {
+                            label: "Rename",
+                            icon: <Edit className="h-4 w-4" />,
+                            onClick: () => {},
+                          },
+                          {
+                            label: "Delete",
+                            icon: <Trash2 className="h-4 w-4" />,
+                            onClick: () => deleteAssets.mutate([item.id]),
+                            danger: true,
+                          },
                         ]}
                       />
                     </td>
@@ -630,12 +732,22 @@ export default function Assets() {
       {filteredAssets.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16">
           <FolderPlus className="h-12 w-12 text-gray-300" />
-          <h3 className="mt-4 text-lg font-medium text-gray-900">No assets found</h3>
+          <h3 className="mt-4 text-lg font-medium text-gray-900">
+            No assets found
+          </h3>
           <p className="mt-1 text-sm text-gray-500">
-            {searchQuery ? 'Try adjusting your search or filters' : 'Upload your first asset to get started'}
+            {searchQuery
+              ? "Try adjusting your search or filters"
+              : "Upload your first asset to get started"}
           </p>
           {!searchQuery && (
-            <Button className="mt-4" leftIcon={<Upload className="h-4 w-4" />}>
+            <Button
+              className="mt-4"
+              leftIcon={<Upload className="h-4 w-4" />}
+              onClick={() =>
+                navigate(folderId ? `/upload?folderId=${folderId}` : "/upload")
+              }
+            >
               Upload Assets
             </Button>
           )}
@@ -656,14 +768,17 @@ export default function Assets() {
             onChange={(e) => setNewFolderName(e.target.value)}
           />
           <div className="flex justify-end gap-3">
-            <Button variant="secondary" onClick={() => setShowNewFolderModal(false)}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowNewFolderModal(false)}
+            >
               Cancel
             </Button>
             <Button
               onClick={handleCreateFolder}
               disabled={!newFolderName.trim() || createFolder.isPending}
             >
-              {createFolder.isPending ? 'Creating...' : 'Create Folder'}
+              {createFolder.isPending ? "Creating..." : "Create Folder"}
             </Button>
           </div>
         </div>
@@ -683,15 +798,18 @@ export default function Assets() {
             onChange={(e) => setNewCollectionName(e.target.value)}
           />
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Color
+            </label>
             <div className="flex flex-wrap gap-2">
               {COLLECTION_COLORS.map((colorOption) => (
                 <button
                   key={colorOption.value}
                   onClick={() => setNewCollectionColor(colorOption.value)}
                   className={clsx(
-                    'h-8 w-8 rounded-full transition-transform',
-                    newCollectionColor === colorOption.value && 'ring-2 ring-offset-2 ring-gray-400 scale-110'
+                    "h-8 w-8 rounded-full transition-transform",
+                    newCollectionColor === colorOption.value &&
+                      "ring-2 ring-offset-2 ring-gray-400 scale-110",
                   )}
                   style={{ backgroundColor: colorOption.value }}
                 />
@@ -699,14 +817,17 @@ export default function Assets() {
             </div>
           </div>
           <div className="flex justify-end gap-3">
-            <Button variant="secondary" onClick={() => setShowNewCollectionModal(false)}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowNewCollectionModal(false)}
+            >
               Cancel
             </Button>
             <Button
               onClick={handleCreateCollection}
               disabled={!newCollectionName.trim() || createCollection.isPending}
             >
-              {createCollection.isPending ? 'Creating...' : 'Create Collection'}
+              {createCollection.isPending ? "Creating..." : "Create Collection"}
             </Button>
           </div>
         </div>

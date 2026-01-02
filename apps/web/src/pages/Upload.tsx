@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
-import { AppLayout } from '@/components/layout';
-import { Button, Card, Badge } from '@/components/ui';
-import { clsx } from 'clsx';
+import { useState, useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { AppLayout } from "@/components/layout";
+import { Button, Card, Badge } from "@/components/ui";
+import { clsx } from "clsx";
 import {
   Upload as UploadIcon,
   X,
@@ -12,41 +13,75 @@ import {
   Image,
   Video,
   FileText,
-} from 'lucide-react';
+} from "lucide-react";
+import { FolderPicker } from "@/components/FolderPicker";
+import { mockFolders } from "@/data/mockData";
 
 interface UploadFile {
   id: string;
   file: File;
   progress: number;
-  status: 'pending' | 'uploading' | 'processing' | 'complete' | 'error';
+  status: "pending" | "uploading" | "processing" | "complete" | "error";
   error?: string;
 }
 
 function getFileIcon(type: string) {
-  if (type.startsWith('video/')) return Video;
-  if (type.startsWith('image/')) return Image;
+  if (type.startsWith("video/")) return Video;
+  if (type.startsWith("image/")) return Image;
   return FileText;
 }
 
 function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
+// Helper function to build folder path from folderId
+function getFolderPath(folderId: string | null): string {
+  if (!folderId) return "/";
+
+  const path: string[] = [];
+  let currentId: string | null = folderId;
+
+  while (currentId) {
+    const folder = mockFolders.find((f) => f.id === currentId);
+    if (!folder) break;
+    path.unshift(folder.name);
+    currentId = folder.parentId;
+  }
+
+  return "/" + path.join("/");
 }
 
 export default function Upload() {
+  const [searchParams] = useSearchParams();
+  const initialFolderId = searchParams.get("folderId");
+
   const [files, setFiles] = useState<UploadFile[]>([]);
   const [isDragActive, setIsDragActive] = useState(false);
-  const [selectedFolder, _setSelectedFolder] = useState('/');
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
+    initialFolderId,
+  );
+  const [selectedFolderPath, setSelectedFolderPath] = useState(
+    getFolderPath(initialFolderId),
+  );
+  const [isFolderPickerOpen, setIsFolderPickerOpen] = useState(false);
+
+  // Update folder path when initialFolderId changes (e.g., navigating from different folders)
+  useEffect(() => {
+    setSelectedFolderId(initialFolderId);
+    setSelectedFolderPath(getFolderPath(initialFolderId));
+  }, [initialFolderId]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
+    if (e.type === "dragenter" || e.type === "dragover") {
       setIsDragActive(true);
-    } else if (e.type === 'dragleave') {
+    } else if (e.type === "dragleave") {
       setIsDragActive(false);
     }
   }, []);
@@ -72,7 +107,7 @@ export default function Upload() {
       id: Math.random().toString(36).substring(7),
       file,
       progress: 0,
-      status: 'pending',
+      status: "pending",
     }));
     setFiles((prev) => [...prev, ...uploadFiles]);
 
@@ -85,7 +120,7 @@ export default function Upload() {
   const simulateUpload = (fileId: string) => {
     // Set to uploading
     setFiles((prev) =>
-      prev.map((f) => (f.id === fileId ? { ...f, status: 'uploading' } : f))
+      prev.map((f) => (f.id === fileId ? { ...f, status: "uploading" } : f)),
     );
 
     // Simulate progress
@@ -97,17 +132,21 @@ export default function Upload() {
         clearInterval(interval);
         // Set to processing
         setFiles((prev) =>
-          prev.map((f) => (f.id === fileId ? { ...f, progress: 100, status: 'processing' } : f))
+          prev.map((f) =>
+            f.id === fileId ? { ...f, progress: 100, status: "processing" } : f,
+          ),
         );
         // Simulate processing
         setTimeout(() => {
           setFiles((prev) =>
-            prev.map((f) => (f.id === fileId ? { ...f, status: 'complete' } : f))
+            prev.map((f) =>
+              f.id === fileId ? { ...f, status: "complete" } : f,
+            ),
           );
         }, 1500);
       } else {
         setFiles((prev) =>
-          prev.map((f) => (f.id === fileId ? { ...f, progress } : f))
+          prev.map((f) => (f.id === fileId ? { ...f, progress } : f)),
         );
       }
     }, 300);
@@ -117,8 +156,19 @@ export default function Upload() {
     setFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
 
-  const completedFiles = files.filter((f) => f.status === 'complete').length;
-  const uploadingFiles = files.filter((f) => f.status === 'uploading' || f.status === 'processing').length;
+  const completedFiles = files.filter((f) => f.status === "complete").length;
+  const uploadingFiles = files.filter(
+    (f) => f.status === "uploading" || f.status === "processing",
+  ).length;
+
+  const handleFolderSelect = (folderId: string | null, folderPath: string) => {
+    setSelectedFolderId(folderId);
+    setSelectedFolderPath(folderPath);
+  };
+
+  const showFolderList = () => {
+    setIsFolderPickerOpen(true);
+  };
 
   return (
     <AppLayout title="Upload">
@@ -130,10 +180,14 @@ export default function Upload() {
               <FolderOpen className="h-5 w-5 text-gray-400" />
               <div>
                 <p className="text-sm font-medium text-gray-900">Upload to</p>
-                <p className="text-sm text-gray-500">{selectedFolder === '/' ? 'Root folder' : selectedFolder}</p>
+                <p className="text-sm text-gray-500">
+                  {selectedFolderPath === "/"
+                    ? "Root folder"
+                    : selectedFolderPath}
+                </p>
               </div>
             </div>
-            <Button variant="secondary" size="sm">
+            <Button variant="secondary" size="sm" onClick={showFolderList}>
               Change Folder
             </Button>
           </div>
@@ -143,10 +197,10 @@ export default function Upload() {
         <Card padding="none">
           <div
             className={clsx(
-              'relative rounded-xl border-2 border-dashed p-12 text-center transition-colors',
+              "relative rounded-xl border-2 border-dashed p-12 text-center transition-colors",
               isDragActive
-                ? 'border-primary-500 bg-primary-50'
-                : 'border-gray-300 hover:border-gray-400'
+                ? "border-primary-500 bg-primary-50"
+                : "border-gray-300 hover:border-gray-400",
             )}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -161,17 +215,21 @@ export default function Upload() {
               accept="video/*,image/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
             />
             <div className="flex flex-col items-center">
-              <div className={clsx(
-                'mb-4 rounded-full p-4',
-                isDragActive ? 'bg-primary-100' : 'bg-gray-100'
-              )}>
-                <UploadIcon className={clsx(
-                  'h-8 w-8',
-                  isDragActive ? 'text-primary-600' : 'text-gray-400'
-                )} />
+              <div
+                className={clsx(
+                  "mb-4 rounded-full p-4",
+                  isDragActive ? "bg-primary-100" : "bg-gray-100",
+                )}
+              >
+                <UploadIcon
+                  className={clsx(
+                    "h-8 w-8",
+                    isDragActive ? "text-primary-600" : "text-gray-400",
+                  )}
+                />
               </div>
               <p className="text-lg font-medium text-gray-900">
-                {isDragActive ? 'Drop files here' : 'Drag and drop files here'}
+                {isDragActive ? "Drop files here" : "Drag and drop files here"}
               </p>
               <p className="mt-1 text-sm text-gray-500">
                 or click to browse from your computer
@@ -195,7 +253,11 @@ export default function Upload() {
                 </p>
               </div>
               {completedFiles === files.length && files.length > 0 && (
-                <Button variant="secondary" size="sm" onClick={() => setFiles([])}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setFiles([])}
+                >
                   Clear All
                 </Button>
               )}
@@ -205,7 +267,10 @@ export default function Upload() {
               {files.map((uploadFile) => {
                 const Icon = getFileIcon(uploadFile.file.type);
                 return (
-                  <li key={uploadFile.id} className="flex items-center gap-4 py-4">
+                  <li
+                    key={uploadFile.id}
+                    className="flex items-center gap-4 py-4"
+                  >
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
                       <Icon className="h-5 w-5 text-gray-500" />
                     </div>
@@ -215,13 +280,14 @@ export default function Upload() {
                           {uploadFile.file.name}
                         </p>
                         <div className="ml-4 flex items-center gap-2">
-                          {uploadFile.status === 'complete' && (
+                          {uploadFile.status === "complete" && (
                             <CheckCircle className="h-5 w-5 text-green-500" />
                           )}
-                          {uploadFile.status === 'error' && (
+                          {uploadFile.status === "error" && (
                             <AlertCircle className="h-5 w-5 text-red-500" />
                           )}
-                          {(uploadFile.status === 'uploading' || uploadFile.status === 'processing') && (
+                          {(uploadFile.status === "uploading" ||
+                            uploadFile.status === "processing") && (
                             <Loader2 className="h-5 w-5 animate-spin text-primary-500" />
                           )}
                           <button
@@ -238,19 +304,20 @@ export default function Upload() {
                         <Badge
                           size="sm"
                           variant={
-                            uploadFile.status === 'complete'
-                              ? 'success'
-                              : uploadFile.status === 'error'
-                              ? 'error'
-                              : 'default'
+                            uploadFile.status === "complete"
+                              ? "success"
+                              : uploadFile.status === "error"
+                                ? "error"
+                                : "default"
                           }
                         >
-                          {uploadFile.status === 'uploading'
+                          {uploadFile.status === "uploading"
                             ? `${Math.round(uploadFile.progress)}%`
                             : uploadFile.status}
                         </Badge>
                       </div>
-                      {(uploadFile.status === 'uploading' || uploadFile.status === 'pending') && (
+                      {(uploadFile.status === "uploading" ||
+                        uploadFile.status === "pending") && (
                         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-100">
                           <div
                             className="h-full rounded-full bg-primary-500 transition-all duration-300"
@@ -259,7 +326,9 @@ export default function Upload() {
                         </div>
                       )}
                       {uploadFile.error && (
-                        <p className="mt-1 text-xs text-red-500">{uploadFile.error}</p>
+                        <p className="mt-1 text-xs text-red-500">
+                          {uploadFile.error}
+                        </p>
                       )}
                     </div>
                   </li>
@@ -273,13 +342,23 @@ export default function Upload() {
         <div className="mt-6 rounded-lg bg-blue-50 p-4">
           <h3 className="text-sm font-medium text-blue-900">Upload Tips</h3>
           <ul className="mt-2 space-y-1 text-sm text-blue-700">
-            <li>• Uploads resume automatically if your connection is interrupted</li>
+            <li>
+              • Uploads resume automatically if your connection is interrupted
+            </li>
             <li>• Large files are uploaded in chunks for reliability</li>
             <li>• Videos will be transcoded to HLS for adaptive streaming</li>
             <li>• AI tagging will be applied automatically after upload</li>
           </ul>
         </div>
       </div>
+
+      {/* Folder Picker Modal */}
+      <FolderPicker
+        isOpen={isFolderPickerOpen}
+        onClose={() => setIsFolderPickerOpen(false)}
+        onSelectFolder={handleFolderSelect}
+        currentFolderId={selectedFolderId}
+      />
     </AppLayout>
   );
 }
