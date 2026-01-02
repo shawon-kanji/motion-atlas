@@ -116,7 +116,62 @@ export default function Settings() {
                   </div>
 
                   <div className="grid gap-6 sm:grid-cols-2">
-                    <Input label="Default Timezone" defaultValue="America/New_York" />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Default Timezone</label>
+                      <select
+                        defaultValue="America/New_York"
+                        className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                      >
+                        <optgroup label="Americas">
+                          <option value="America/New_York">Eastern Time (ET) - New York</option>
+                          <option value="America/Chicago">Central Time (CT) - Chicago</option>
+                          <option value="America/Denver">Mountain Time (MT) - Denver</option>
+                          <option value="America/Los_Angeles">Pacific Time (PT) - Los Angeles</option>
+                          <option value="America/Anchorage">Alaska Time - Anchorage</option>
+                          <option value="Pacific/Honolulu">Hawaii Time - Honolulu</option>
+                          <option value="America/Toronto">Eastern Time - Toronto</option>
+                          <option value="America/Vancouver">Pacific Time - Vancouver</option>
+                          <option value="America/Mexico_City">Central Time - Mexico City</option>
+                          <option value="America/Sao_Paulo">Brasilia Time - São Paulo</option>
+                          <option value="America/Argentina/Buenos_Aires">Argentina Time - Buenos Aires</option>
+                        </optgroup>
+                        <optgroup label="Europe">
+                          <option value="Europe/London">Greenwich Mean Time (GMT) - London</option>
+                          <option value="Europe/Paris">Central European Time (CET) - Paris</option>
+                          <option value="Europe/Berlin">Central European Time (CET) - Berlin</option>
+                          <option value="Europe/Amsterdam">Central European Time (CET) - Amsterdam</option>
+                          <option value="Europe/Madrid">Central European Time (CET) - Madrid</option>
+                          <option value="Europe/Rome">Central European Time (CET) - Rome</option>
+                          <option value="Europe/Stockholm">Central European Time (CET) - Stockholm</option>
+                          <option value="Europe/Moscow">Moscow Time - Moscow</option>
+                          <option value="Europe/Istanbul">Turkey Time - Istanbul</option>
+                        </optgroup>
+                        <optgroup label="Asia">
+                          <option value="Asia/Dubai">Gulf Standard Time - Dubai</option>
+                          <option value="Asia/Kolkata">India Standard Time - Mumbai</option>
+                          <option value="Asia/Bangkok">Indochina Time - Bangkok</option>
+                          <option value="Asia/Singapore">Singapore Time - Singapore</option>
+                          <option value="Asia/Hong_Kong">Hong Kong Time - Hong Kong</option>
+                          <option value="Asia/Shanghai">China Standard Time - Shanghai</option>
+                          <option value="Asia/Tokyo">Japan Standard Time - Tokyo</option>
+                          <option value="Asia/Seoul">Korea Standard Time - Seoul</option>
+                        </optgroup>
+                        <optgroup label="Australia & Pacific">
+                          <option value="Australia/Perth">Australian Western Time - Perth</option>
+                          <option value="Australia/Sydney">Australian Eastern Time - Sydney</option>
+                          <option value="Australia/Melbourne">Australian Eastern Time - Melbourne</option>
+                          <option value="Pacific/Auckland">New Zealand Time - Auckland</option>
+                        </optgroup>
+                        <optgroup label="Africa">
+                          <option value="Africa/Cairo">Eastern European Time - Cairo</option>
+                          <option value="Africa/Johannesburg">South Africa Time - Johannesburg</option>
+                          <option value="Africa/Lagos">West Africa Time - Lagos</option>
+                        </optgroup>
+                        <optgroup label="UTC">
+                          <option value="UTC">Coordinated Universal Time (UTC)</option>
+                        </optgroup>
+                      </select>
+                    </div>
                     <Input label="Date Format" defaultValue="MM/DD/YYYY" />
                   </div>
                 </div>
