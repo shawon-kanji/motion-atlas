@@ -10,14 +10,13 @@ motion-atlas/
 │   ├── api/          # Go + Gin backend (DDD)
 │   └── web/          # React + Vite frontend
 ├── packages/         # Shared packages (future)
-├── feature-doc/      # Product specs & Jira backlog
 ├── pnpm-workspace.yaml
 └── package.json
 ```
 
 ## Prerequisites
 
-- Node.js ≥ 20
+- Node.js 22.11.0 (see .nvmrc)
 - pnpm ≥ 9
 - Go ≥ 1.23
 
@@ -63,8 +62,6 @@ cd apps/api && make build
 | POST   | /api/v1/auth/signup | User signup   |
 | POST   | /api/v1/auth/login  | User login    |
 
-## Project Documentation
+## License
 
-- [Product Overview](feature-doc/product-overview.md)
-- [MVP Tickets](feature-doc/phase-0-mvp.md)
-- [Jira Backlog CSV](feature-doc/jira/jira-backlog.csv)
+MIT

@@ -5,7 +5,10 @@
   "description": "Video/Digital Asset Management SaaS — monorepo",
   "scripts": {
     "dev": "pnpm --filter @motion-atlas/web dev",
+    "dev:api": "cd apps/api && go run ./cmd/api",
+    "dev:all": "pnpm dev & pnpm dev:api",
     "build": "pnpm --filter @motion-atlas/web build",
+    "build:api": "cd apps/api && make build",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test"
   },
