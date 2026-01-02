@@ -6,7 +6,9 @@ import {
   User,
   Menu,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Avatar, Dropdown } from '@/components/ui';
+import { useAuthStore } from '@/stores/authStore';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -14,6 +16,14 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick, title }: HeaderProps) {
+  const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 lg:px-6">
       <div className="flex items-center gap-4">
@@ -57,24 +67,24 @@ export function Header({ onMenuClick, title }: HeaderProps) {
         <Dropdown
           trigger={
             <button className="flex items-center gap-2 rounded-lg p-1.5 hover:bg-gray-100">
-              <Avatar name="John Doe" size="sm" />
+              <Avatar name={user?.name || 'User'} src={user?.avatar} size="sm" />
             </button>
           }
           items={[
             {
               label: 'Profile',
               icon: <User className="h-4 w-4" />,
-              onClick: () => console.log('Profile'),
+              onClick: () => navigate('/settings'),
             },
             {
               label: 'Settings',
               icon: <Settings className="h-4 w-4" />,
-              onClick: () => console.log('Settings'),
+              onClick: () => navigate('/settings'),
             },
             {
               label: 'Sign out',
               icon: <LogOut className="h-4 w-4" />,
-              onClick: () => console.log('Sign out'),
+              onClick: handleLogout,
               danger: true,
             },
           ]}

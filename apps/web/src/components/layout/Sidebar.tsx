@@ -115,37 +115,6 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
             <HelpCircle className="h-5 w-5" />
             {!collapsed && <span>Help & Support</span>}
           </Link>
-
-          {user && (
-            <div className="mt-4">
-              <Dropdown
-                trigger={
-                  <button className="flex w-full items-center gap-3 rounded-lg px-2 py-2 hover:bg-gray-800">
-                    <Avatar name={user.name} src={user.avatar} size="sm" />
-                    {!collapsed && (
-                      <div className="flex-1 min-w-0 text-left">
-                        <p className="truncate text-sm font-medium">{user.name}</p>
-                        <p className="truncate text-xs text-gray-400">{user.email}</p>
-                      </div>
-                    )}
-                  </button>
-                }
-                items={[
-                  {
-                    label: 'Settings',
-                    icon: <Settings className="h-4 w-4" />,
-                    onClick: () => navigate('/settings'),
-                  },
-                  {
-                    label: 'Sign out',
-                    icon: <LogOut className="h-4 w-4" />,
-                    onClick: handleLogout,
-                  },
-                ]}
-                align="left"
-              />
-            </div>
-          )}
         </div>
       </div>
     </aside>
