@@ -30,7 +30,7 @@ import {
 import {
   useAssets,
   useFolders,
-  useFolder,
+  useFolderPath,
   useCollections,
   useCreateFolder,
   useCreateCollection,
@@ -113,7 +113,7 @@ export default function Assets() {
   // API hooks - pass folderId to filter by current folder
   const { data: assets = [], isLoading: assetsLoading } = useAssets(folderId || null);
   const { data: folders = [] } = useFolders(folderId || null);
-  const { data: currentFolder } = useFolder(folderId || '');
+  const { data: folderPath = [] } = useFolderPath(folderId);
   const { data: collections = [] } = useCollections();
   const createFolder = useCreateFolder();
   const createCollection = useCreateCollection();
@@ -203,8 +203,14 @@ export default function Assets() {
 
   const breadcrumbs = [
     { name: 'All Assets', href: '/assets' },
-    ...(currentFolder ? [{ name: currentFolder.name, href: `/assets/${currentFolder.id}` }] : []),
+    ...folderPath.map(folder => ({
+      name: folder.name,
+      href: `/assets/${folder.id}`
+    })),
   ];
+
+  // Current folder is the last item in the path
+  const currentFolder = folderPath.length > 0 ? folderPath[folderPath.length - 1] : null;
 
   // Page title based on current folder
   const pageTitle = currentFolder ? currentFolder.name : 'Assets';

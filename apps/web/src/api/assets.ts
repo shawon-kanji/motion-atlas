@@ -165,6 +165,30 @@ export const useFolder = (folderId: string) => {
   });
 };
 
+export const useFolderPath = (folderId: string | undefined) => {
+  return useQuery({
+    queryKey: ['folderPath', folderId],
+    queryFn: async () => {
+      await delay(100);
+      if (!folderId) return [];
+      
+      // Build path from current folder to root
+      const path: Folder[] = [];
+      let currentId: string | null = folderId;
+      
+      while (currentId) {
+        const folder = mockFolders.find(f => f.id === currentId);
+        if (!folder) break;
+        path.unshift(folder); // Add to beginning to build path from root to current
+        currentId = folder.parentId;
+      }
+      
+      return path;
+    },
+    enabled: !!folderId,
+  });
+};
+
 export const useCreateFolder = () => {
   const queryClient = useQueryClient();
   const addFolder = useAssetStore((state) => state.addFolder);
