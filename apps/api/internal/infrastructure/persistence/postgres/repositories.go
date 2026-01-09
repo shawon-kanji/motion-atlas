@@ -3,7 +3,8 @@ package postgres
 
 import (
 	"errors"
-	"sync"
+
+	"gorm.io/gorm"
 
 	"github.com/motion-atlas/api/internal/domain/user"
 )
@@ -14,83 +15,97 @@ var (
 	ErrAlreadyExists = errors.New("record already exists")
 )
 
-// In-memory storage for testing (simulates database)
-var (
-	usersDB   = make(map[string]*user.User) // key: user ID
-	emailsDB  = make(map[string]string)     // key: email, value: user ID
-	userMutex sync.RWMutex
-)
-
-// UserRepository implements user.Repository with in-memory storage.
-type UserRepository struct{}
+// UserRepository implements user.Repository with GORM/PostgreSQL.
+type UserRepository struct {
+	db *gorm.DB
+}
 
 // NewUserRepository creates a new UserRepository.
-func NewUserRepository() *UserRepository {
-	return &UserRepository{}
+func NewUserRepository(db *gorm.DB) *UserRepository {
+	return &UserRepository{db: db}
 }
 
 // FindByID retrieves a user by ID.
 func (r *UserRepository) FindByID(id string) (*user.User, error) {
-	userMutex.RLock()
-	defer userMutex.RUnlock()
-
-	u, ok := usersDB[id]
-	if !ok {
-		return nil, ErrNotFound
+	var model UserModel
+	if err := r.db.Where("id = ?", id).First(&model).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, err
 	}
-	return u, nil
+	return model.ToDomain(), nil
 }
 
 // FindByEmail retrieves a user by email.
 func (r *UserRepository) FindByEmail(email string) (*user.User, error) {
-	userMutex.RLock()
-	defer userMutex.RUnlock()
-
-	id, ok := emailsDB[email]
-	if !ok {
-		return nil, ErrNotFound
+	var model UserModel
+	if err := r.db.Where("email = ?", email).First(&model).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, err
 	}
-	return usersDB[id], nil
+	return model.ToDomain(), nil
 }
 
 // Save creates or updates a user.
 func (r *UserRepository) Save(u *user.User) error {
-	userMutex.Lock()
-	defer userMutex.Unlock()
+	model := UserModelFromDomain(u)
 
-	// Check if email already exists for a different user
-	if existingID, ok := emailsDB[u.Email]; ok && existingID != u.ID {
-		return ErrAlreadyExists
+	// Check if user exists
+	var existing UserModel
+	err := r.db.Where("id = ?", u.ID).First(&existing).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// Create new user
+		if err := r.db.Create(model).Error; err != nil {
+			// Check for unique constraint violation
+			if isUniqueViolation(err) {
+				return ErrAlreadyExists
+			}
+			return err
+		}
+		return nil
 	}
 
-	usersDB[u.ID] = u
-	emailsDB[u.Email] = u.ID
-	return nil
+	if err != nil {
+		return err
+	}
+
+	// Update existing user
+	return r.db.Save(model).Error
 }
 
 // Delete removes a user by ID.
 func (r *UserRepository) Delete(id string) error {
-	userMutex.Lock()
-	defer userMutex.Unlock()
-
-	u, ok := usersDB[id]
-	if !ok {
+	result := r.db.Where("id = ?", id).Delete(&UserModel{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
 		return ErrNotFound
 	}
-
-	delete(emailsDB, u.Email)
-	delete(usersDB, id)
 	return nil
 }
 
-// GetAllUsers returns all users (for debugging).
-func (r *UserRepository) GetAllUsers() []*user.User {
-	userMutex.RLock()
-	defer userMutex.RUnlock()
-
-	users := make([]*user.User, 0, len(usersDB))
-	for _, u := range usersDB {
-		users = append(users, u)
+// isUniqueViolation checks if the error is a unique constraint violation.
+func isUniqueViolation(err error) bool {
+	if err == nil {
+		return false
 	}
-	return users
+	errStr := err.Error()
+	// PostgreSQL unique violation error code is 23505
+	return errors.Is(err, gorm.ErrDuplicatedKey) ||
+		contains(errStr, "23505") ||
+		contains(errStr, "duplicate key")
+}
+
+func contains(s, substr string) bool {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return true
+		}
+	}
+	return false
 }

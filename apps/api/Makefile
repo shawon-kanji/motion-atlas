@@ -1,4 +1,4 @@
-.PHONY: run build test tidy
+.PHONY: run build test tidy db-up db-down db-logs
 
 # Default: run the API server
 run:
@@ -15,3 +15,15 @@ test:
 # Tidy dependencies
 tidy:
 	go mod tidy
+
+# Start PostgreSQL container
+db-up:
+	docker compose up -d
+
+# Stop PostgreSQL container
+db-down:
+	docker compose down
+
+# View PostgreSQL logs
+db-logs:
+	docker compose logs -f postgres

@@ -3,15 +3,17 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+
 	userService "github.com/motion-atlas/api/internal/application/user"
 	"github.com/motion-atlas/api/internal/infrastructure/persistence/postgres"
 	"github.com/motion-atlas/api/internal/interfaces/http/handlers"
 )
 
 // RegisterRoutes sets up all API routes.
-func RegisterRoutes(r *gin.Engine) {
+func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 	// Initialize repositories
-	userRepo := postgres.NewUserRepository()
+	userRepo := postgres.NewUserRepository(db)
 
 	// Initialize services
 	userSvc := userService.NewService(userRepo)

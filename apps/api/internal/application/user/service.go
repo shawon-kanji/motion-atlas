@@ -3,8 +3,10 @@ package user
 
 import (
 	"errors"
+	"os"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/motion-atlas/api/internal/domain/user"
 	"golang.org/x/crypto/bcrypt"
@@ -12,9 +14,10 @@ import (
 
 // Service errors
 var (
-	ErrEmailExists     = errors.New("email already registered")
-	ErrInvalidPassword = errors.New("password must be at least 8 characters")
-	ErrUserNotFound    = errors.New("user not found")
+	ErrEmailExists        = errors.New("email already registered")
+	ErrInvalidPassword    = errors.New("password must be at least 8 characters")
+	ErrUserNotFound       = errors.New("user not found")
+	ErrInvalidCredentials = errors.New("invalid email or password")
 )
 
 // SignupRequest represents the data needed to create a new user.
@@ -92,4 +95,79 @@ func (s *Service) GetByID(id string) (*user.User, error) {
 // GetByEmail retrieves a user by email.
 func (s *Service) GetByEmail(email string) (*user.User, error) {
 	return s.repo.FindByEmail(email)
+}
+
+type LoginRequest struct {
+	Email    string
+	Password string
+}
+
+type LoginResponse struct {
+	Token     string `json:"token"`
+	ExpiresAt int64  `json:"expires_at"`
+	User      struct {
+		ID    string `json:"id"`
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	} `json:"user"`
+}
+
+// Login authenticates a user and returns a JWT token.
+func (s *Service) Login(req *LoginRequest) (*LoginResponse, error) {
+	// Find user by email
+	u, err := s.repo.FindByEmail(req.Email)
+	if err != nil {
+		return nil, ErrInvalidCredentials
+	}
+
+	// Compare password
+	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(req.Password)); err != nil {
+		return nil, ErrInvalidCredentials
+	}
+
+	// Generate JWT token
+	token, expiresAt, err := generateJWT(u)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LoginResponse{
+		Token:     token,
+		ExpiresAt: expiresAt,
+		User: struct {
+			ID    string `json:"id"`
+			Email string `json:"email"`
+			Name  string `json:"name"`
+		}{
+			ID:    u.ID,
+			Email: u.Email,
+			Name:  u.Name,
+		},
+	}, nil
+}
+
+// generateJWT creates a signed JWT token for the user.
+func generateJWT(u *user.User) (string, int64, error) {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		secret = "changeme" // fallback for development
+	}
+
+	expiresAt := time.Now().Add(24 * time.Hour).Unix()
+
+	claims := jwt.MapClaims{
+		"sub":   u.ID,
+		"email": u.Email,
+		"name":  u.Name,
+		"exp":   expiresAt,
+		"iat":   time.Now().Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString([]byte(secret))
+	if err != nil {
+		return "", 0, err
+	}
+
+	return signedToken, expiresAt, nil
 }

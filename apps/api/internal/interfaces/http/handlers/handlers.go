@@ -61,7 +61,38 @@ func (h *Handler) Signup(c *gin.Context) {
 	})
 }
 
+type LoginRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
 // Login handles user authentication.
 func (h *Handler) Login(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "login successful"})
+	var req LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	resp, err := h.userService.Login(&userService.LoginRequest{
+		Email:    req.Email,
+		Password: req.Password,
+	})
+	if err != nil {
+		switch err {
+		case userService.ErrInvalidCredentials:
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "login failed"})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":    "login successful",
+		"token":      resp.Token,
+		"expires_at": resp.ExpiresAt,
+		"user":       resp.User,
+	})
 }
