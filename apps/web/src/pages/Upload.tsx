@@ -15,7 +15,8 @@ import {
   FileText,
 } from "lucide-react";
 import { FolderPicker } from "@/components/FolderPicker";
-import { mockFolders } from "@/data/mockData";
+import { useCreateAsset, useFolder } from "@/api/assets";
+import { useAuthStore } from "@/stores/authStore";
 
 interface UploadFile {
   id: string;
@@ -39,41 +40,24 @@ function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
-// Helper function to build folder path from folderId
-function getFolderPath(folderId: string | null): string {
-  if (!folderId) return "/";
-
-  const path: string[] = [];
-  let currentId: string | null = folderId;
-
-  while (currentId) {
-    const folder = mockFolders.find((f) => f.id === currentId);
-    if (!folder) break;
-    path.unshift(folder.name);
-    currentId = folder.parentId;
-  }
-
-  return "/" + path.join("/");
-}
-
 export default function Upload() {
   const [searchParams] = useSearchParams();
   const initialFolderId = searchParams.get("folderId");
+  const { workspace } = useAuthStore();
+  const createAsset = useCreateAsset();
 
   const [files, setFiles] = useState<UploadFile[]>([]);
   const [isDragActive, setIsDragActive] = useState(false);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
     initialFolderId,
   );
-  const [selectedFolderPath, setSelectedFolderPath] = useState(
-    getFolderPath(initialFolderId),
-  );
   const [isFolderPickerOpen, setIsFolderPickerOpen] = useState(false);
 
-  // Update folder path when initialFolderId changes (e.g., navigating from different folders)
+  // Fetch folder details if selected
+  const { data: currentFolder } = useFolder(selectedFolderId);
+
   useEffect(() => {
     setSelectedFolderId(initialFolderId);
-    setSelectedFolderPath(getFolderPath(initialFolderId));
   }, [initialFolderId]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -100,6 +84,10 @@ export default function Upload() {
     if (e.target.files && e.target.files.length > 0) {
       addFiles(Array.from(e.target.files));
     }
+    // Reset input
+    if (e.target) {
+        e.target.value = '';
+    }
   };
 
   const addFiles = (newFiles: File[]) => {
@@ -109,51 +97,39 @@ export default function Upload() {
       progress: 0,
       status: "pending",
     }));
+
     setFiles((prev) => [...prev, ...uploadFiles]);
-
-    // Simulate uploads
-    uploadFiles.forEach((uploadFile) => {
-      simulateUpload(uploadFile.id);
-    });
   };
 
-  const simulateUpload = (fileId: string) => {
-    // Set to uploading
-    setFiles((prev) =>
-      prev.map((f) => (f.id === fileId ? { ...f, status: "uploading" } : f)),
-    );
+  // Auto-upload effect
+  useEffect(() => {
+    if (!workspace) return;
 
-    // Simulate progress
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 30;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
-        // Set to processing
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.id === fileId ? { ...f, progress: 100, status: "processing" } : f,
-          ),
-        );
-        // Simulate processing
-        setTimeout(() => {
-          setFiles((prev) =>
-            prev.map((f) =>
-              f.id === fileId ? { ...f, status: "complete" } : f,
-            ),
-          );
-        }, 1500);
-      } else {
-        setFiles((prev) =>
-          prev.map((f) => (f.id === fileId ? { ...f, progress } : f)),
-        );
+    const pendingFiles = files.filter(f => f.status === "pending");
+
+    pendingFiles.forEach(async (fileObj) => {
+      // Mark as uploading
+      setFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'uploading' } : f));
+
+      try {
+        await createAsset.mutateAsync({
+          file: fileObj.file,
+          name: fileObj.file.name,
+          workspaceId: workspace.id,
+          folderId: selectedFolderId
+        });
+
+        setFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'complete', progress: 100 } : f));
+      } catch (err) {
+        console.error("Upload failed", err);
+        setFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'error', error: 'Upload failed' } : f));
       }
-    }, 300);
-  };
+    });
+  }, [files, workspace, selectedFolderId, createAsset]);
 
-  const removeFile = (fileId: string) => {
-    setFiles((prev) => prev.filter((f) => f.id !== fileId));
+
+  const removeFile = (id: string) => {
+    setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
   const completedFiles = files.filter((f) => f.status === "complete").length;
@@ -161,13 +137,8 @@ export default function Upload() {
     (f) => f.status === "uploading" || f.status === "processing",
   ).length;
 
-  const handleFolderSelect = (folderId: string | null, folderPath: string) => {
+  const handleFolderSelect = (folderId: string | null) => {
     setSelectedFolderId(folderId);
-    setSelectedFolderPath(folderPath);
-  };
-
-  const showFolderList = () => {
-    setIsFolderPickerOpen(true);
   };
 
   return (
@@ -181,13 +152,13 @@ export default function Upload() {
               <div>
                 <p className="text-sm font-medium text-gray-900">Upload to</p>
                 <p className="text-sm text-gray-500">
-                  {selectedFolderPath === "/"
-                    ? "Root folder"
-                    : selectedFolderPath}
+                  {selectedFolderId && currentFolder
+                    ? `/${currentFolder.name}` // Simplified path for now
+                    : "Root folder"}
                 </p>
               </div>
             </div>
-            <Button variant="secondary" size="sm" onClick={showFolderList}>
+            <Button variant="secondary" size="sm" onClick={() => setIsFolderPickerOpen(true)}>
               Change Folder
             </Button>
           </div>

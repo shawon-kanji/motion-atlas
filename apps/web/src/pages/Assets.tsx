@@ -36,6 +36,8 @@ import {
   useCreateCollection,
   useDeleteAssets,
 } from "@/api/assets";
+import { useAuthStore } from "@/stores/authStore";
+
 // Asset store available for future use when adding local state management
 
 type ViewMode = "grid" | "list";
@@ -95,6 +97,7 @@ function getAssetIcon(type: string) {
 export default function Assets() {
   const navigate = useNavigate();
   const { folderId } = useParams<{ folderId?: string }>();
+  const { workspace } = useAuthStore();
 
   // View state
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -164,11 +167,12 @@ export default function Assets() {
   };
 
   const handleCreateFolder = async () => {
-    if (!newFolderName.trim()) return;
+    if (!newFolderName.trim() || !workspace) return;
 
     try {
       await createFolder.mutateAsync({
         name: newFolderName,
+        workspaceId: workspace.id,
         parentId: folderId || null,
       });
       setShowNewFolderModal(false);

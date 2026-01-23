@@ -45,13 +45,15 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
     >
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-16 items-center gap-3 border-b border-gray-200 px-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500">
-            <span className="text-lg font-bold text-gray-50">M</span>
-          </div>
-          {!collapsed && (
-            <span className="text-lg font-semibold">Motion Atlas</span>
-          )}
+        <div className="flex h-16 items-center border-b border-gray-200 px-4">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500">
+              <span className="text-lg font-bold text-gray-50">M</span>
+            </div>
+            {!collapsed && (
+              <span className="text-lg font-semibold">Motion Atlas</span>
+            )}
+          </Link>
         </div>
 
         {/* Workspace Selector */}

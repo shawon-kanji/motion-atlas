@@ -3,9 +3,11 @@ package postgres
 
 import (
 	"errors"
+	"time"
 
 	"gorm.io/gorm"
 
+	"github.com/motion-atlas/api/internal/domain/asset"
 	"github.com/motion-atlas/api/internal/domain/user"
 )
 
@@ -47,6 +49,152 @@ func (r *UserRepository) FindByEmail(email string) (*user.User, error) {
 		return nil, err
 	}
 	return model.ToDomain(), nil
+}
+
+// AssetRepository implements asset.Repository with GORM/PostgreSQL.
+type AssetRepository struct {
+	db *gorm.DB
+}
+
+// NewAssetRepository creates a new AssetRepository.
+func NewAssetRepository(db *gorm.DB) *AssetRepository {
+	return &AssetRepository{db: db}
+}
+
+// FindByID retrieves an asset by ID.
+func (r *AssetRepository) FindByID(id string) (*asset.Asset, error) {
+	var model AssetModel
+	if err := r.db.Where("id = ?", id).First(&model).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return model.ToDomain(), nil
+}
+
+// FindByWorkspace retrieves assets by workspace ID with pagination.
+// If folderID is provided, it filters by folder.
+// If folderID is nil (but checked explicitly in call), it could mean "root".
+// We need to handle this convention carefully.
+// A simpler way:
+// If folderID != nil, filter by folder_id = *folderID.
+// If folderID == nil, filter by folder_id IS NULL (root assets).
+func (r *AssetRepository) FindByWorkspace(workspaceID string, folderID *string, limit, offset int) ([]*asset.Asset, error) {
+	query := r.db.Where("workspace_id = ?", workspaceID)
+
+	if folderID != nil {
+		query = query.Where("folder_id = ?", *folderID)
+	} else {
+		// If explicit nil passed, we want root assets
+		query = query.Where("folder_id IS NULL")
+	}
+
+	var models []AssetModel
+	if err := query.
+		Limit(limit).
+		Offset(offset).
+		Order("created_at desc").
+		Find(&models).Error; err != nil {
+		return nil, err
+	}
+
+	assets := make([]*asset.Asset, len(models))
+	for i, m := range models {
+		assets[i] = m.ToDomain()
+	}
+	return assets, nil
+}
+
+// Save persists an asset.
+func (r *AssetRepository) Save(a *asset.Asset) error {
+	model := AssetModelFromDomain(a)
+	return r.db.Save(model).Error
+}
+
+// Delete removes an asset by ID.
+func (r *AssetRepository) Delete(id string) error {
+	return r.db.Delete(&AssetModel{}, "id = ?", id).Error
+}
+
+// GetStats returns usage statistics for a workspace.
+func (r *AssetRepository) GetStats(workspaceID string) (*asset.Stats, error) {
+	var stats asset.Stats
+
+	// Total assets
+	if err := r.db.Model(&AssetModel{}).
+		Where("workspace_id = ?", workspaceID).
+		Count(&stats.TotalAssets).Error; err != nil {
+		return nil, err
+	}
+
+	// Recent uploads (last 7 days)
+	weekAgo := time.Now().AddDate(0, 0, -7)
+	if err := r.db.Model(&AssetModel{}).
+		Where("workspace_id = ? AND created_at >= ?", workspaceID, weekAgo).
+		Count(&stats.RecentUploadsLastWeek).Error; err != nil {
+		return nil, err
+	}
+
+	return &stats, nil
+}
+
+// CreateFolder persists a new folder.
+func (r *AssetRepository) CreateFolder(folder *asset.Folder) error {
+	model := FolderModelFromDomain(folder)
+	return r.db.Save(model).Error
+}
+
+// GetFolders retrieves folders in a specific directory (root or subdirectory).
+func (r *AssetRepository) GetFolders(workspaceID string, parentID *string) ([]*asset.Folder, error) {
+	query := r.db.Where("workspace_id = ?", workspaceID)
+
+	if parentID != nil {
+		query = query.Where("parent_id = ?", *parentID)
+	} else {
+		query = query.Where("parent_id IS NULL")
+	}
+
+	var models []FolderModel
+	if err := query.Order("name asc").Find(&models).Error; err != nil {
+		return nil, err
+	}
+
+	folders := make([]*asset.Folder, len(models))
+	for i, m := range models {
+		f := m.ToDomain()
+
+		// Get asset count
+		var count int64
+		r.db.Model(&AssetModel{}).Where("folder_id = ?", f.ID).Count(&count)
+		f.AssetCount = count
+
+		folders[i] = f
+	}
+
+	return folders, nil
+}
+
+// GetFolder retrieves a folder by ID.
+func (r *AssetRepository) GetFolder(id string) (*asset.Folder, error) {
+	var model FolderModel
+	if err := r.db.Where("id = ?", id).First(&model).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return model.ToDomain(), nil
+}
+
+// DeleteFolder removes a folder.
+func (r *AssetRepository) DeleteFolder(id string) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		// Optional: Delete children or move them to root?
+		// For now, let's assume cascade delete or forbid if not empty is logic for service layer.
+		// DB FK constraints might handle cascade.
+		return tx.Delete(&FolderModel{}, "id = ?", id).Error
+	})
 }
 
 // Save creates or updates a user.

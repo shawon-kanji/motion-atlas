@@ -1,14 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Modal, Button } from '@/components/ui';
-import { Folder, FolderOpen, ChevronRight, ChevronDown, Home } from 'lucide-react';
+import { Folder, FolderOpen, ChevronRight, ChevronDown, Home, Loader2 } from 'lucide-react';
 import { clsx } from 'clsx';
-import { mockFolders } from '@/data/mockData';
+import { useFolders } from '@/api/assets';
 import type { Folder as FolderType } from '@/stores/assetStore';
 
 interface FolderPickerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectFolder: (folderId: string | null, folderPath: string) => void;
+  onSelectFolder: (folderId: string | null) => void;
   currentFolderId?: string | null;
 }
 
@@ -19,7 +19,6 @@ interface FolderTreeItemProps {
   expandedFolders: Set<string>;
   onSelect: (folderId: string) => void;
   onToggleExpand: (folderId: string) => void;
-  childFolders: Map<string | null, FolderType[]>;
 }
 
 function FolderTreeItem({
@@ -29,12 +28,22 @@ function FolderTreeItem({
   expandedFolders,
   onSelect,
   onToggleExpand,
-  childFolders,
 }: FolderTreeItemProps) {
   const isExpanded = expandedFolders.has(folder.id);
   const isSelected = selectedFolderId === folder.id;
-  const children = childFolders.get(folder.id) || [];
-  const hasChildren = children.length > 0;
+
+  // Fetch children only if expanded
+  const { data: children = [], isLoading } = useFolders(folder.id);
+
+  // We don't know if it has children until we fetch or check a 'childCount' property
+  // For now, let's assume if it's not expanded, we show a chevron if we suspect children
+  // Or just always show chevron?
+  // Using !isExpanded as a heuristic or maybe we can update backend later to send child count over.
+  // For now: Always show chevron unless we loaded and found 0 children.
+
+  const hasChildren = (children && children.length > 0) || !isExpanded;
+  // If expanded and loaded and length 0, then no children.
+  const empty = isExpanded && !isLoading && children.length === 0;
 
   return (
     <div>
@@ -48,32 +57,29 @@ function FolderTreeItem({
         style={{ paddingLeft: `${level * 16 + 12}px` }}
         onClick={() => onSelect(folder.id)}
       >
-        {hasChildren ? (
-          <button
+        <button
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand(folder.id);
             }}
-            className="p-0.5 hover:bg-gray-200 rounded"
+            className={clsx("p-0.5 hover:bg-gray-200 rounded", empty ? "invisible" : "")}
           >
             {isExpanded ? (
               <ChevronDown className="h-4 w-4" />
             ) : (
-              <ChevronRight className="h-4 w-4" />
+               <ChevronRight className="h-4 w-4" />
             )}
-          </button>
-        ) : (
-          <span className="w-5" />
-        )}
+        </button>
+
         {isExpanded ? (
           <FolderOpen className="h-5 w-5 text-amber-500" />
         ) : (
           <Folder className="h-5 w-5 text-amber-500" />
         )}
         <span className="text-sm font-medium truncate">{folder.name}</span>
-        <span className="text-xs text-gray-400 ml-auto">{folder.assetCount}</span>
+        {isLoading && isExpanded && <Loader2 className="h-3 w-3 animate-spin text-gray-400" />}
       </div>
-      {isExpanded && hasChildren && (
+      {isExpanded && (
         <div>
           {children.map((child) => (
             <FolderTreeItem
@@ -84,9 +90,13 @@ function FolderTreeItem({
               expandedFolders={expandedFolders}
               onSelect={onSelect}
               onToggleExpand={onToggleExpand}
-              childFolders={childFolders}
             />
           ))}
+            {children.length === 0 && !isLoading && (
+                <div style={{ paddingLeft: `${(level + 1) * 16 + 12}px` }} className="py-2 px-3 text-xs text-gray-500">
+                    No subfolders
+                </div>
+            )}
         </div>
       )}
     </div>
@@ -104,40 +114,8 @@ export function FolderPicker({
   );
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
-  // Build folder hierarchy
-  const { rootFolders, childFolders } = useMemo(() => {
-    const childMap = new Map<string | null, FolderType[]>();
-
-    mockFolders.forEach((folder) => {
-      const parentId = folder.parentId;
-      if (!childMap.has(parentId)) {
-        childMap.set(parentId, []);
-      }
-      childMap.get(parentId)!.push(folder);
-    });
-
-    return {
-      rootFolders: childMap.get(null) || [],
-      childFolders: childMap,
-    };
-  }, []);
-
-  // Build folder path string
-  const getFolderPath = (folderId: string | null): string => {
-    if (!folderId) return '/';
-
-    const path: string[] = [];
-    let currentId: string | null = folderId;
-
-    while (currentId) {
-      const folder = mockFolders.find((f) => f.id === currentId);
-      if (!folder) break;
-      path.unshift(folder.name);
-      currentId = folder.parentId;
-    }
-
-    return '/' + path.join('/');
-  };
+  // Use null for root folders
+  const { data: rootFolders = [], isLoading } = useFolders(null);
 
   const handleToggleExpand = (folderId: string) => {
     setExpandedFolders((prev) => {
@@ -156,8 +134,10 @@ export function FolderPicker({
   };
 
   const handleConfirm = () => {
-    const path = getFolderPath(selectedFolderId);
-    onSelectFolder(selectedFolderId, path);
+    // We removed path building because relying on client-side full tree is hard
+    // and passing just ID is usually sufficient for backend.
+    // If path is needed for UI, the parent component should fetch it.
+    onSelectFolder(selectedFolderId);
     onClose();
   };
 
@@ -187,25 +167,26 @@ export function FolderPicker({
 
         {/* Folder tree */}
         <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-lg p-2">
-          {rootFolders.map((folder) => (
-            <FolderTreeItem
-              key={folder.id}
-              folder={folder}
-              level={0}
-              selectedFolderId={selectedFolderId}
-              expandedFolders={expandedFolders}
-              onSelect={setSelectedFolderId}
-              onToggleExpand={handleToggleExpand}
-              childFolders={childFolders}
-            />
-          ))}
+            {isLoading && <div className="p-4 text-center"><Loader2 className="mx-auto h-5 w-5 animate-spin text-gray-400" /></div>}
+
+            {rootFolders.map((folder) => (
+                <FolderTreeItem
+                key={folder.id}
+                folder={folder}
+                level={0}
+                selectedFolderId={selectedFolderId}
+                expandedFolders={expandedFolders}
+                onSelect={setSelectedFolderId}
+                onToggleExpand={handleToggleExpand}
+                />
+            ))}
         </div>
 
-        {/* Selected path preview */}
+        {/* Selected path mock status */}
         <div className="mt-4 p-3 bg-gray-50 rounded-lg">
           <p className="text-xs text-gray-500 mb-1">Upload destination:</p>
           <p className="text-sm font-medium text-gray-900">
-            {getFolderPath(selectedFolderId)}
+            {selectedFolderId ? `Selected Folder ID: ${selectedFolderId}` : "Root Folder"}
           </p>
         </div>
 

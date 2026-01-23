@@ -5,17 +5,22 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	assetService "github.com/motion-atlas/api/internal/application/asset"
 	userService "github.com/motion-atlas/api/internal/application/user"
 )
 
 // Handler holds dependencies for HTTP handlers.
 type Handler struct {
-	userService *userService.Service
+	userService  *userService.Service
+	assetService *assetService.Service
 }
 
 // NewHandler creates a new Handler with dependencies.
-func NewHandler(us *userService.Service) *Handler {
-	return &Handler{userService: us}
+func NewHandler(us *userService.Service, as *assetService.Service) *Handler {
+	return &Handler{
+		userService:  us,
+		assetService: as,
+	}
 }
 
 // Health returns service health status.
@@ -94,5 +99,32 @@ func (h *Handler) Login(c *gin.Context) {
 		"token":      resp.Token,
 		"expires_at": resp.ExpiresAt,
 		"user":       resp.User,
+	})
+}
+
+// Me returns the current authenticated user's data.
+func (h *Handler) Me(c *gin.Context) {
+	// Get user ID from context (set by auth middleware)
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	// Fetch fresh user data from database
+	user, err := h.userService.GetByID(userID.(string))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"user": gin.H{
+			"id":                user.ID,
+			"email":             user.Email,
+			"name":              user.Name,
+			"is_email_verified": user.IsEmailVerified,
+			"created_at":        user.CreatedAt,
+		},
 	})
 }
