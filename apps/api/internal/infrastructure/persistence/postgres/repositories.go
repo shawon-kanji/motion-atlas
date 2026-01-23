@@ -9,6 +9,7 @@ import (
 
 	"github.com/motion-atlas/api/internal/domain/asset"
 	"github.com/motion-atlas/api/internal/domain/user"
+	"github.com/motion-atlas/api/internal/domain/workspace"
 )
 
 // Common errors
@@ -256,4 +257,94 @@ func contains(s, substr string) bool {
 		}
 	}
 	return false
+}
+
+// WorkspaceRepository implements workspace.Repository with GORM/PostgreSQL.
+type WorkspaceRepository struct {
+	db *gorm.DB
+}
+
+// NewWorkspaceRepository creates a new WorkspaceRepository.
+func NewWorkspaceRepository(db *gorm.DB) *WorkspaceRepository {
+	return &WorkspaceRepository{db: db}
+}
+
+// FindByID retrieves a workspace by ID.
+func (r *WorkspaceRepository) FindByID(id string) (*workspace.Workspace, error) {
+	var model WorkspaceModel
+	if err := r.db.Where("id = ?", id).First(&model).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return model.ToDomain(), nil
+}
+
+// FindByOwner retrieves workspaces owned by a user.
+func (r *WorkspaceRepository) FindByOwner(ownerID string) ([]*workspace.Workspace, error) {
+	var models []WorkspaceModel
+	if err := r.db.Where("owner_id = ?", ownerID).Find(&models).Error; err != nil {
+		return nil, err
+	}
+
+	workspaces := make([]*workspace.Workspace, len(models))
+	for i, m := range models {
+		workspaces[i] = m.ToDomain()
+	}
+	return workspaces, nil
+}
+
+// Save persists a workspace.
+func (r *WorkspaceRepository) Save(ws *workspace.Workspace) error {
+	model := WorkspaceModelFromDomain(ws)
+	return r.db.Save(model).Error
+}
+
+// Delete removes a workspace.
+func (r *WorkspaceRepository) Delete(id string) error {
+	return r.db.Delete(&WorkspaceModel{}, "id = ?", id).Error
+}
+
+// AddMember adds a user to a workspace.
+func (r *WorkspaceRepository) AddMember(member *workspace.Member) error {
+	model := MemberModelFromDomain(member)
+	return r.db.Create(model).Error
+}
+
+// RemoveMember removes a user from a workspace.
+func (r *WorkspaceRepository) RemoveMember(workspaceID, userID string) error {
+	return r.db.Where("workspace_id = ? AND user_id = ?", workspaceID, userID).Delete(&MemberModel{}).Error
+}
+
+// GetMembers retrieves members of a workspace.
+func (r *WorkspaceRepository) GetMembers(workspaceID string) ([]*workspace.Member, error) {
+	var models []MemberModel
+	if err := r.db.Where("workspace_id = ?", workspaceID).Find(&models).Error; err != nil {
+		return nil, err
+	}
+
+	members := make([]*workspace.Member, len(models))
+	for i, m := range models {
+		members[i] = m.ToDomain()
+	}
+	return members, nil
+}
+
+// FindByUserID finds all workspaces a user is a member of.
+func (r *WorkspaceRepository) FindByUserID(userID string) ([]*workspace.Workspace, error) {
+	var models []WorkspaceModel
+	err := r.db.Joins("JOIN workspace_members on workspace_members.workspace_id = workspaces.id").
+		Where("workspace_members.user_id = ?", userID).
+		Find(&models).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	workspaces := make([]*workspace.Workspace, len(models))
+	for i, m := range models {
+		workspaces[i] = m.ToDomain()
+	}
+	return workspaces, nil
 }

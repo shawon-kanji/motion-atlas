@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { authApi } from '@/api/auth';
+import { workspaceApi, Workspace } from '@/api/workspaces';
 
 export interface User {
   id: string;
@@ -9,13 +10,8 @@ export interface User {
   role: 'owner' | 'admin' | 'member' | 'viewer';
 }
 
-export interface Workspace {
-  id: string;
-  name: string;
-  slug: string;
-  plan: 'free' | 'pro' | 'enterprise';
-  logo?: string;
-}
+// Re-export or use the one from api
+export type { Workspace };
 
 interface AuthState {
   user: User | null;
@@ -30,18 +26,10 @@ interface AuthState {
   logout: () => void;
   checkSession: () => Promise<void>;
   switchWorkspace: (workspaceId: string) => void;
+  fetchWorkspaces: () => Promise<void>;
+  createWorkspace: (name: string) => Promise<void>;
   clearError: () => void;
 }
-
-const DEFAULT_WORKSPACES: Workspace[] = [
-  {
-    id: 'ws-1',
-    name: 'Default Workspace',
-    slug: 'default-workspace',
-    plan: 'free',
-    logo: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=32&h=32&fit=crop&crop=faces',
-  }
-];
 
 export const useAuthStore = create<AuthState>()(
   (set, get) => ({
@@ -51,6 +39,35 @@ export const useAuthStore = create<AuthState>()(
     isAuthenticated: false,
     isLoading: false,
     error: null,
+
+    fetchWorkspaces: async () => {
+      try {
+        const workspaces = await workspaceApi.getAll();
+        set((state) => {
+           // Keep current workspace if still in list, otherwise pick first
+           let nextWorkspace = state.workspace;
+           if (!nextWorkspace || !workspaces.find(w => w.id === nextWorkspace?.id)) {
+               nextWorkspace = workspaces.length > 0 ? workspaces[0] : null;
+           }
+           return { workspaces, workspace: nextWorkspace };
+        });
+      } catch (error) {
+        console.error("Failed to fetch workspaces", error);
+      }
+    },
+
+    createWorkspace: async (name: string) => {
+        try {
+            const newWs = await workspaceApi.create(name);
+            set(state => ({
+                workspaces: [...state.workspaces, newWs],
+                workspace: newWs // Switch to new workspace?
+            }));
+        } catch (error) {
+            console.error("Failed to create workspace", error);
+            throw error;
+        }
+    },
 
     login: async (email, password) => {
       set({ isLoading: true, error: null });
@@ -70,9 +87,11 @@ export const useAuthStore = create<AuthState>()(
           user,
           isAuthenticated: true,
           isLoading: false,
-          workspaces: DEFAULT_WORKSPACES,
-          workspace: DEFAULT_WORKSPACES[0],
         });
+
+        // Fetch workspaces
+        await get().fetchWorkspaces();
+
       } catch (error: any) {
         set({
           error: error.response?.data?.error || 'Invalid email or password',
@@ -127,25 +146,27 @@ export const useAuthStore = create<AuthState>()(
         set({
           user,
           isAuthenticated: true,
-          workspaces: DEFAULT_WORKSPACES,
-          workspace: DEFAULT_WORKSPACES[0],
         });
+
+        await get().fetchWorkspaces();
       } catch (error) {
         localStorage.removeItem('token');
         set({
           user: null,
+          workspace: null,
+          workspaces: [],
           isAuthenticated: false,
         });
       }
     },
 
-    switchWorkspace: (workspaceId) => {
-      const workspace = get().workspaces.find((w) => w.id === workspaceId);
-      if (workspace) {
-        set({ workspace });
-      }
+    switchWorkspace: (workspaceId: string) => {
+      set((state) => ({
+        workspace: state.workspaces.find((w) => w.id === workspaceId) || null,
+      }));
     },
 
     clearError: () => set({ error: null }),
-  })
+  }),
 );
+

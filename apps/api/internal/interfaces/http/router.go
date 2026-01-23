@@ -7,6 +7,7 @@ import (
 
 	assetService "github.com/motion-atlas/api/internal/application/asset"
 	userService "github.com/motion-atlas/api/internal/application/user"
+	workspaceService "github.com/motion-atlas/api/internal/application/workspace"
 	"github.com/motion-atlas/api/internal/infrastructure/persistence/postgres"
 	"github.com/motion-atlas/api/internal/interfaces/http/handlers"
 	"github.com/motion-atlas/api/internal/interfaces/http/middleware"
@@ -17,13 +18,15 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 	// Initialize repositories
 	userRepo := postgres.NewUserRepository(db)
 	assetRepo := postgres.NewAssetRepository(db)
+	workspaceRepo := postgres.NewWorkspaceRepository(db)
 
 	// Initialize services
 	userSvc := userService.NewService(userRepo)
 	assetSvc := assetService.NewService(assetRepo)
+	workspaceSvc := workspaceService.NewService(workspaceRepo)
 
 	// Initialize handlers
-	h := handlers.NewHandler(userSvc, assetSvc)
+	h := handlers.NewHandler(userSvc, assetSvc, workspaceSvc)
 
 	r.GET("/health", handlers.Health)
 
@@ -52,5 +55,10 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 		// Folders
 		protected.POST("/folders", h.CreateFolder)
 		protected.GET("/folders", h.GetFolders)
+
+		// Workspaces
+		protected.POST("/workspaces", h.CreateWorkspace)
+		protected.GET("/workspaces", h.GetWorkspaces)
+		protected.GET("/workspaces/:id", h.GetWorkspace)
 	}
 }

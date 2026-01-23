@@ -41,7 +41,7 @@ function FolderTreeItem({
   // Using !isExpanded as a heuristic or maybe we can update backend later to send child count over.
   // For now: Always show chevron unless we loaded and found 0 children.
 
-  const hasChildren = (children && children.length > 0) || !isExpanded;
+  // const hasChildren = (children && children.length > 0) || !isExpanded;
   // If expanded and loaded and length 0, then no children.
   const empty = isExpanded && !isLoading && children.length === 0;
 

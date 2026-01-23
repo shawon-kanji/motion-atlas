@@ -1,5 +1,5 @@
 import api from './client';
-import { User } from '@/stores/authStore';
+// import { User } from '@/stores/authStore';
 
 // We define minimal interfaces for API responses.
 // Note: Backend user object might be simpler than Frontend Store User object.

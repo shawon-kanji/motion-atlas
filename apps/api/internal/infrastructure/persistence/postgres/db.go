@@ -90,7 +90,9 @@ func AutoMigrate(db *gorm.DB) error {
 	log.Println("Running database migrations...")
 	return db.AutoMigrate(
 		&UserModel{},
-
-		// Add more models here as needed
+		&WorkspaceModel{},
+		&MemberModel{},
+		&AssetModel{},
+		&FolderModel{},
 	)
 }

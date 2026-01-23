@@ -76,7 +76,7 @@ export const useAsset = (assetId: string) => {
 
 export const useCreateAsset = () => {
   const queryClient = useQueryClient();
-  const addAsset = useAssetStore((state) => state.addAsset);
+  // const addAsset = useAssetStore((state) => state.addAsset);
 
   return useMutation({
     mutationFn: async ({ file, name, workspaceId, folderId, tags }: CreateAssetParams) => {
@@ -94,7 +94,7 @@ export const useCreateAsset = () => {
       });
       return response.data;
     },
-    onSuccess: (newAsset) => {
+    onSuccess: () => {
       // addAsset(newAsset); // Optional: we can rely on invalidation
       queryClient.invalidateQueries({ queryKey: ["assets"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
@@ -136,9 +136,14 @@ export const useFolder = (folderId: string | null) => {
   });
 };
 
-export const useFolderPath = (folderId?: string | null) => {
+export const useFolderPath = (_folderId?: string | null) => {
   // Mock path for now until backend supports returning full path hierarchy
-  return [];
+  // Return a query-like object or use useQuery
+  return useQuery({
+      queryKey: ['folderPath', _folderId],
+      queryFn: async () => [] as Folder[],
+      enabled: false // disable for now
+  });
 };
 
 export const useCreateFolder = () => {
@@ -200,19 +205,19 @@ export const useCollections = () => {
 
 export const useCreateCollection = () => {
     return useMutation({
-        mutationFn: async () => {}
+        mutationFn: async (_data: { name: string; description?: string; color?: string }) => {}
     })
 }
 
 export const useDeleteAssets = () => {
     return useMutation({
-        mutationFn: async (ids: string[]) => {}
+        mutationFn: async (_ids: string[]) => {}
     })
 }
 
 export const useUpdateAsset = () => {
     return useMutation({
-        mutationFn: async () => {}
+        mutationFn: async (_data: any) => {}
     })
 }
 
@@ -232,6 +237,6 @@ export const useAssetComments = (assetId: string) => {
 
 export const useAddComment = () => {
     return useMutation({
-        mutationFn: async () => {}
+        mutationFn: async (_data: any) => {}
     })
 }

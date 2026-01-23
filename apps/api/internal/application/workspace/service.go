@@ -2,7 +2,7 @@
 package workspace
 
 import (
-"github.com/motion-atlas/api/internal/domain/workspace"
+	"github.com/motion-atlas/api/internal/domain/workspace"
 )
 
 // Service orchestrates workspace use-cases.
@@ -28,4 +28,9 @@ func (s *Service) Create(ws *workspace.Workspace) error {
 // AddMember adds a member to a workspace.
 func (s *Service) AddMember(m *workspace.Member) error {
 	return s.repo.AddMember(m)
+}
+
+// ListByUser retrieves workspaces a user is a member of.
+func (s *Service) ListByUser(userID string) ([]*workspace.Workspace, error) {
+	return s.repo.FindByUserID(userID)
 }

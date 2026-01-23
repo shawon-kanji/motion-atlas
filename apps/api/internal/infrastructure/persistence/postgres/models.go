@@ -6,6 +6,7 @@ import (
 
 	"github.com/motion-atlas/api/internal/domain/asset"
 	"github.com/motion-atlas/api/internal/domain/user"
+	"github.com/motion-atlas/api/internal/domain/workspace"
 )
 
 // UserModel is the GORM model for the users table.
@@ -17,6 +18,7 @@ type UserModel struct {
 	IsEmailVerified bool   `gorm:"default:false"`
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
+	workspaces      []WorkspaceModel `gorm:"foreignKey:OwnerID"`
 }
 
 // TableName specifies the table name for UserModel.
@@ -47,6 +49,79 @@ func UserModelFromDomain(u *user.User) *UserModel {
 		IsEmailVerified: u.IsEmailVerified,
 		CreatedAt:       u.CreatedAt,
 		UpdatedAt:       u.UpdatedAt,
+	}
+}
+
+// WorkspaceModel is the GORM model for the workspaces table.
+type WorkspaceModel struct {
+	ID        string `gorm:"type:uuid;primaryKey"`
+	Name      string `gorm:"type:varchar(255);not null"`
+	OwnerID   string `gorm:"type:uuid;not null"`
+	Plan      string `gorm:"type:varchar(50);default:'free'"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Members   []MemberModel `gorm:"foreignKey:WorkspaceID"`
+}
+
+// MemberModel is the GORM model for the workspace_members table.
+type MemberModel struct {
+	UserID      string `gorm:"type:uuid;primaryKey"`
+	WorkspaceID string `gorm:"type:uuid;primaryKey"`
+	Role        string `gorm:"type:varchar(50);default:'viewer'"`
+	JoinedAt    time.Time
+}
+
+// TableName specifies the table name for WorkspaceModel.
+func (WorkspaceModel) TableName() string {
+	return "workspaces"
+}
+
+// TableName specifies the table name for MemberModel.
+func (MemberModel) TableName() string {
+	return "workspace_members"
+}
+
+// ToDomain converts WorkspaceModel to domain Workspace.
+func (m *WorkspaceModel) ToDomain() *workspace.Workspace {
+	return &workspace.Workspace{
+		ID:        m.ID,
+		Name:      m.Name,
+		OwnerID:   m.OwnerID,
+		Plan:      m.Plan,
+		CreatedAt: m.CreatedAt,
+		UpdatedAt: m.UpdatedAt,
+	}
+}
+
+// WorkspaceModelFromDomain converts domain Workspace to WorkspaceModel.
+func WorkspaceModelFromDomain(w *workspace.Workspace) *WorkspaceModel {
+	return &WorkspaceModel{
+		ID:        w.ID,
+		Name:      w.Name,
+		OwnerID:   w.OwnerID,
+		Plan:      w.Plan,
+		CreatedAt: w.CreatedAt,
+		UpdatedAt: w.UpdatedAt,
+	}
+}
+
+// ToDomain converts MemberModel to domain Member.
+func (m *MemberModel) ToDomain() *workspace.Member {
+	return &workspace.Member{
+		UserID:      m.UserID,
+		WorkspaceID: m.WorkspaceID,
+		Role:        m.Role,
+		JoinedAt:    m.JoinedAt,
+	}
+}
+
+// MemberModelFromDomain converts domain Member to MemberModel.
+func MemberModelFromDomain(m *workspace.Member) *MemberModel {
+	return &MemberModel{
+		UserID:      m.UserID,
+		WorkspaceID: m.WorkspaceID,
+		Role:        m.Role,
+		JoinedAt:    m.JoinedAt,
 	}
 }
 

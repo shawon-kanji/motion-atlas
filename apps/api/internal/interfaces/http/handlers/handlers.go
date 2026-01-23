@@ -7,19 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 	assetService "github.com/motion-atlas/api/internal/application/asset"
 	userService "github.com/motion-atlas/api/internal/application/user"
+	workspaceService "github.com/motion-atlas/api/internal/application/workspace"
 )
 
 // Handler holds dependencies for HTTP handlers.
 type Handler struct {
-	userService  *userService.Service
-	assetService *assetService.Service
+	userService      *userService.Service
+	assetService     *assetService.Service
+	workspaceService *workspaceService.Service
 }
 
 // NewHandler creates a new Handler with dependencies.
-func NewHandler(us *userService.Service, as *assetService.Service) *Handler {
+func NewHandler(us *userService.Service, as *assetService.Service, ws *workspaceService.Service) *Handler {
 	return &Handler{
-		userService:  us,
-		assetService: as,
+		userService:      us,
+		assetService:     as,
+		workspaceService: ws,
 	}
 }
 
