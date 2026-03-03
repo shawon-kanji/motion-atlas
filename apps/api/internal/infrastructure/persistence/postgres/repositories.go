@@ -348,3 +348,13 @@ func (r *WorkspaceRepository) FindByUserID(userID string) ([]*workspace.Workspac
 	}
 	return workspaces, nil
 }
+
+// IsMember checks if a user is a member of a workspace.
+func (r *WorkspaceRepository) IsMember(workspaceID, userID string) (bool, error) {
+	var count int64
+	err := r.db.Model(&MemberModel{}).Where("workspace_id = ? AND user_id = ?", workspaceID, userID).Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

@@ -36,6 +36,13 @@ func (h *Handler) CreateAsset(c *gin.Context) {
 		return
 	}
 
+	// Verify workspace access
+	userID := GetUserID(c)
+	if isMember, err := h.workspaceService.CheckMembership(workspaceID, userID); err != nil || !isMember {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied to workspace"})
+		return
+	}
+
 	name := c.PostForm("name")
 	if name == "" {
 		name = file.Filename
@@ -122,6 +129,13 @@ func (h *Handler) GetAssets(c *gin.Context) {
 		return
 	}
 
+	// Verify workspace access
+	userID := GetUserID(c)
+	if isMember, err := h.workspaceService.CheckMembership(workspaceID, userID); err != nil || !isMember {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied to workspace"})
+		return
+	}
+
 	// Handle folder filtering
 	var folderID *string
 	if fid := c.Query("folder_id"); fid != "" {
@@ -173,6 +187,13 @@ func (h *Handler) CreateFolder(c *gin.Context) {
 		return
 	}
 
+	// Verify workspace access
+	userID := GetUserID(c)
+	if isMember, err := h.workspaceService.CheckMembership(req.WorkspaceID, userID); err != nil || !isMember {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied to workspace"})
+		return
+	}
+
 	now := time.Now()
 	folder := &asset.Folder{
 		ID:          uuid.New().String(),
@@ -196,6 +217,13 @@ func (h *Handler) GetFolders(c *gin.Context) {
 	workspaceID := c.Query("workspace_id")
 	if workspaceID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "workspace_id is required"})
+		return
+	}
+
+	// Verify workspace access
+	userID := GetUserID(c)
+	if isMember, err := h.workspaceService.CheckMembership(workspaceID, userID); err != nil || !isMember {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied to workspace"})
 		return
 	}
 
@@ -227,6 +255,13 @@ func (h *Handler) GetAsset(c *gin.Context) {
 		return
 	}
 
+	// Verify workspace access
+	userID := GetUserID(c)
+	if isMember, err := h.workspaceService.CheckMembership(a.WorkspaceID, userID); err != nil || !isMember {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied to workspace"})
+		return
+	}
+
 	c.JSON(http.StatusOK, a)
 }
 
@@ -235,6 +270,13 @@ func (h *Handler) GetAssetStats(c *gin.Context) {
 	workspaceID := c.Query("workspace_id")
 	if workspaceID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "workspace_id is required"})
+		return
+	}
+
+	// Verify workspace access
+	userID := GetUserID(c)
+	if isMember, err := h.workspaceService.CheckMembership(workspaceID, userID); err != nil || !isMember {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied to workspace"})
 		return
 	}
 

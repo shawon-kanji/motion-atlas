@@ -34,3 +34,8 @@ func (s *Service) AddMember(m *workspace.Member) error {
 func (s *Service) ListByUser(userID string) ([]*workspace.Workspace, error) {
 	return s.repo.FindByUserID(userID)
 }
+
+// CheckMembership checks if a user is a member of a workspace.
+func (s *Service) CheckMembership(workspaceID, userID string) (bool, error) {
+	return s.repo.IsMember(workspaceID, userID)
+}
